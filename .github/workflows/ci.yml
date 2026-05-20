@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then npm ci; 
+          elif [ -f package.json ]; then npm install;
+          else echo "No package.json found. Skipping install.";
+          fi
+
+      - name: Lint
+        run: |
+          if [ -f package.json ] && npm run | grep -q "lint"; then npm run lint; 
+          else echo "No lint script found. Skipping lint.";
+          fi
+
+      - name: Test
+        run: |
+          if [ -f package.json ] && npm run | grep -q "test"; then npm test; 
+          else echo "No test script found. Skipping tests.";
+          fi
+
