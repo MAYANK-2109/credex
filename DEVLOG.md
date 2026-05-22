@@ -1,17 +1,17 @@
-## Day 1 2026-05-20
-**Hours spent:** 2.5
+## Day 2 2026-05-21
+**Hours spent:** 
+
 **Work done:**
-- Studied project rubric and created 12 required root directory files.
-- Studied LLM tokenization principles and basic price structures for target tools.
-- Developed outline of documentation for the blank markdown files.
+- Worked on Next.js.
+- Implemented hydration mismatch mitigation (client-only render after mount) to fix the hydration failed issue.
 
-**Knowledge gained:**
-- Code contains a large number of tokens as opposed to regular text because of formatting.
-- Claude Team policies have a mandatory minimum of 5 users, which makes them one of the main optimization objects.
-
-**Issues faced:**
-- Finding the exact information and links about pricing changes in the tools.
+**Today’s learning:**
+- Worked in Next.js and learned URL making using respective modules.
+- Learned more about spend audits mathematics and improved myself.
+- Added more eye-catching learnings.
 
 **Work for tomorrow:**
-- Continue researching prices to fill `PRICING_DATA.md` file.
-- Create the calculation files for developing logic of math engine.
+- Improve the audit logic.
+- Work on the UI/UX of the website more.
+- Strengthen the research part to give a great outcome.
+

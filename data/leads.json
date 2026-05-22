@@ -1,0 +1,47 @@
+[
+  {
+    "email": "test@example.com",
+    "companyName": "Acme",
+    "role": "Product",
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 2,
+    "timestamp": "2026-05-21T18:49:42.345Z"
+  },
+  {
+    "email": "test@example.com",
+    "companyName": "Acme",
+    "role": "Product",
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 2,
+    "timestamp": "2026-05-21T18:53:56.162Z"
+  },
+  {
+    "email": "test@example.com",
+    "companyName": "Acme",
+    "role": "Product",
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 2,
+    "timestamp": "2026-05-21T18:56:03.781Z"
+  },
+  {
+    "email": "test@example.com",
+    "companyName": "Acme",
+    "role": "Product",
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 2,
+    "timestamp": "2026-05-21T19:00:31.564Z"
+  },
+  {
+    "email": "test@example.com",
+    "companyName": "Acme",
+    "role": "Product",
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 2,
+    "timestamp": "2026-05-21T19:28:36.629Z"
+  }
+]

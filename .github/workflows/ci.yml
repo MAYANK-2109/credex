@@ -30,6 +30,12 @@ jobs:
           else echo "No lint script found. Skipping lint.";
           fi
 
+      - name: Type check
+        run: |
+          if [ -f package.json ] && npm run | grep -q "type-check"; then npm run type-check; 
+          else echo "No type-check script found. Skipping type check.";
+          fi
+
       - name: Test
         run: |
           if [ -f package.json ] && npm run | grep -q "test"; then npm test; 

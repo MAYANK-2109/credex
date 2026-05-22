@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Download } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   TeamSizeInput,
   UseCaseSelect,
@@ -20,12 +19,11 @@ import {
 } from '@/lib/optimization-engine';
 import { generateOptimizationSummary } from '@/lib/llm-service';
 import { storageUtils, type FormState } from '@/lib/storage-utils';
+import styles from '@/components/credex.module.css';
 
-/**
- * Main optimizer page component
- * Handles multi-step form state, optimization engine, and results display
- */
 export default function OptimizerPage() {
+  const [mounted, setMounted] = useState(false);
+
   // Form state
   const [teamSize, setTeamSize] = useState(5);
   const [primaryUseCase, setPrimaryUseCase] = useState<UseCase>('coding');
@@ -39,7 +37,10 @@ export default function OptimizerPage() {
   const [leadCaptureError, setLeadCaptureError] = useState('');
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
 
-  // Load persisted state on mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     const saved = storageUtils.loadState();
     if (saved) {
@@ -49,7 +50,6 @@ export default function OptimizerPage() {
     }
   }, []);
 
-  // Persist state to localStorage whenever it changes
   useEffect(() => {
     const state: FormState = {
       teamSize,
@@ -59,7 +59,6 @@ export default function OptimizerPage() {
     storageUtils.saveState(state);
   }, [teamSize, primaryUseCase, selectedTools]);
 
-  // Tool management
   const handleAddTool = (tool: ToolConfig) => {
     setSelectedTools([...selectedTools, tool]);
   };
@@ -79,9 +78,7 @@ export default function OptimizerPage() {
     );
   };
 
-  // Calculate optimization
   const handleCalculate = async () => {
-    // Validation
     if (selectedTools.length === 0) {
       alert('Please select at least one tool');
       return;
@@ -90,26 +87,22 @@ export default function OptimizerPage() {
     setHasCalculated(true);
     setIsSummaryLoading(true);
 
-    // Run optimization engine
-    const result = optimizeToolStack(selectedTools);
+    const result = optimizeToolStack(selectedTools, teamSize, primaryUseCase);
 
-    // Fetch LLM summary with fallback
     const summaryResponse = await generateOptimizationSummary(
       result,
       teamSize,
       primaryUseCase,
-      5000 // 5 second timeout
+      5000
     );
 
     setSummary(summaryResponse.text);
     setIsSummaryLoading(false);
 
-    // Show lead capture if savings > $500
     if (result.totalMonthlySavings > 500) {
       setLeadCaptureVisible(true);
     }
 
-    // Scroll to results
     setTimeout(() => {
       document
         .getElementById('results-section')
@@ -117,11 +110,9 @@ export default function OptimizerPage() {
     }, 100);
   };
 
-  // Handle lead capture submission
   const handleLeadSubmit = async (data: LeadCaptureData) => {
     setIsSubmittingLead(true);
     setLeadCaptureError('');
-
     try {
       const response = await fetch('/api/leads', {
         method: 'POST',
@@ -140,7 +131,32 @@ export default function OptimizerPage() {
         throw new Error('Failed to submit');
       }
 
-      // Show success
+      try {
+        await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            score: data.rating,
+            teamSize,
+            primaryUseCase,
+            toolCount: selectedTools.length,
+          }),
+        });
+      } catch (feedbackError) {
+        console.warn('Feedback save failed', feedbackError);
+      }
+
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'lead_submitted', {
+          teamSize,
+          toolCount: selectedTools.length,
+          primaryUseCase,
+        });
+        (window as any).gtag('event', 'audit_feedback_submitted', {
+          score: data.rating,
+        });
+      }
+
       alert('Thank you! We\'ll be in touch soon.');
       setLeadCaptureVisible(false);
     } catch (_error) {
@@ -150,167 +166,163 @@ export default function OptimizerPage() {
     }
   };
 
-  // Calculate optimization result
-  const optimizationResult = hasCalculated
-    ? optimizeToolStack(selectedTools)
-    : null;
+  const optimizationResult = useMemo(
+    () =>
+      selectedTools.length > 0
+        ? optimizeToolStack(selectedTools, teamSize, primaryUseCase)
+        : null,
+    [selectedTools, teamSize, primaryUseCase]
+  );
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      {/* Header */}
-      <div className="mx-auto max-w-2xl text-center">
-        <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-          Dev Tool Stack <span className="text-accent-600">Optimizer</span>
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>
+          AI Spend <span className="gradient-text">Audit</span>
         </h1>
-        <p className="mt-4 text-lg text-slate-600">
-          Analyze your development tooling costs and unlock savings opportunities
+        <p className={styles.subtitle}>
+          Stop wasting money on redundant or sub-optimal AI tool plans. Instantly audit your stack for free.
         </p>
-      </div>
+      </header>
 
-      <div className="mx-auto mt-12 max-w-4xl">
-        {/* Input Section */}
-        {!hasCalculated ? (
-          <div className="space-y-8">
-            {/* Form Card */}
-            <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-              <h2 className="mb-6 text-xl font-bold text-slate-900">
-                1. Team Configuration
-              </h2>
-
-              <div className="grid gap-6 sm:grid-cols-2">
-                <TeamSizeInput value={teamSize} onChange={setTeamSize} />
-                <UseCaseSelect value={primaryUseCase} onChange={setPrimaryUseCase} />
-              </div>
-            </div>
-
-            {/* Tools Section */}
-            <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-              <h2 className="mb-6 text-xl font-bold text-slate-900">
-                2. Select Active Tools & Plans
-              </h2>
-
-              <ToolGrid
-                selectedTools={selectedTools}
-                onAdd={handleAddTool}
-                onRemove={handleRemoveTool}
-                onUpdate={handleUpdateTool}
-              />
-            </div>
-
-            {/* CTA Button */}
-            <button
-              onClick={handleCalculate}
-              className="w-full rounded-xl bg-gradient-to-r from-accent-600 to-accent-700 px-6 py-4 font-bold text-white shadow-lg transition-all hover:shadow-xl hover:from-accent-700 hover:to-accent-800 active:scale-95"
-            >
-              Analyze & Get Recommendations
-            </button>
+      {!hasCalculated ? (
+        <div className="glass-panel" style={{ padding: '3rem', maxWidth: '800px', margin: '0 auto' }}>
+          <div className={styles.grid} style={{ marginBottom: '3rem' }}>
+            <TeamSizeInput value={teamSize} onChange={setTeamSize} />
+            <UseCaseSelect value={primaryUseCase} onChange={setPrimaryUseCase} />
           </div>
-        ) : null}
 
-        {/* Results Section */}
-        {hasCalculated && optimizationResult ? (
-          <div id="results-section" className="space-y-8">
-            {/* Hero Banner */}
-            <ResultsHeroBanner
-              monthlySavings={optimizationResult.totalMonthlySavings}
-              annualSavings={optimizationResult.totalAnnualSavings}
-            />
+          <ToolGrid
+            selectedTools={selectedTools}
+            onAdd={handleAddTool}
+            onRemove={handleRemoveTool}
+            onUpdate={handleUpdateTool}
+          />
 
-            {/* Summary Text */}
-            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-              <h3 className="mb-3 font-semibold text-slate-900">Your Summary</h3>
+          <button onClick={handleCalculate} className={styles.primaryButton} style={{ marginTop: '2rem' }}>
+            Run Instant Audit
+          </button>
+        </div>
+      ) : null}
+
+      {hasCalculated && optimizationResult ? (
+        <div id="results-section" style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <ResultsHeroBanner
+            monthlySavings={optimizationResult.totalMonthlySavings}
+            annualSavings={optimizationResult.totalAnnualSavings}
+          />
+
+          <div style={{ marginTop: '4rem', marginBottom: '4rem' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>AI Stack Analysis</h3>
+            <div className={styles.summaryBox}>
               {isSummaryLoading ? (
-                <div className="animate-pulse space-y-2">
-                  <div className="h-4 w-full rounded bg-slate-200" />
-                  <div className="h-4 w-5/6 rounded bg-slate-200" />
-                </div>
+                <div style={{ opacity: 0.5, animation: 'pulse 2s infinite' }}>Analyzing your tooling matrix...</div>
               ) : (
-                <p className="text-sm leading-relaxed text-slate-600">
-                  {summary}
-                </p>
+                <p>{summary}</p>
               )}
             </div>
+          </div>
 
-            {/* Optimized or Recommendations */}
+          <div style={{ marginBottom: '4rem' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Actionable Insights</h3>
             {optimizationResult.isFullyOptimized ? (
               <OptimizedStateMessage savings={optimizationResult.totalMonthlySavings} />
             ) : (
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold text-slate-900">
-                  Recommended Actions
-                </h3>
-                <div className="grid gap-4">
-                  {optimizationResult.recommendations.map((rec) => (
-                    <RecommendationCard
-                      key={rec.toolId}
-                      recommendation={rec}
-                    />
-                  ))}
-                </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {optimizationResult.recommendations.map((rec) => (
+                  <RecommendationCard key={rec.toolId} recommendation={rec} />
+                ))}
               </div>
             )}
-
-            {/* CTA Section */}
-            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-              <SavingsCTA
-                savings={optimizationResult.totalMonthlySavings}
-                onConsultationClick={() => setLeadCaptureVisible(true)}
-                onNotifyClick={() => setLeadCaptureVisible(true)}
-              />
-            </div>
-
-            {/* Lead Capture Form (Modal) */}
-            {leadCaptureVisible && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-xl">
-                  <h3 className="mb-4 text-xl font-bold text-slate-900">
-                    {optimizationResult.totalMonthlySavings > 500
-                      ? 'Book Your Consultation'
-                      : 'Get Notified'}
-                  </h3>
-                  <p className="mb-6 text-sm text-slate-600">
-                    {optimizationResult.totalMonthlySavings > 500
-                      ? 'Our optimization experts will review your specific setup and help implement these savings.'
-                      : 'We\'ll notify you when new optimizations become available for your tooling.'}
-                  </p>
-
-                  <LeadCaptureForm
-                    onSubmit={handleLeadSubmit}
-                    isLoading={isSubmittingLead}
-                    errorMessage={leadCaptureError}
-                  />
-
-                  <button
-                    onClick={() => setLeadCaptureVisible(false)}
-                    className="mt-4 w-full rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Back Button */}
-            <button
-              onClick={() => {
-                setHasCalculated(false);
-                setSummary('');
-                setLeadCaptureVisible(false);
-              }}
-              className="w-full rounded-lg border-2 border-slate-300 px-6 py-3 font-semibold text-slate-700 transition-all hover:border-slate-400 hover:bg-slate-50"
-            >
-              ← Adjust Configuration & Recalculate
-            </button>
           </div>
-        ) : null}
-      </div>
 
-      {/* Footer */}
-      <div className="mx-auto mt-16 max-w-4xl border-t border-slate-200 pt-8 text-center">
-        <p className="text-sm text-slate-500">
-          Powered by Credex optimization intelligence
-        </p>
-      </div>
+          <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
+            <SavingsCTA
+              savings={optimizationResult.totalMonthlySavings}
+              onConsultationClick={() => setLeadCaptureVisible(true)}
+              onNotifyClick={() => setLeadCaptureVisible(true)}
+            />
+            
+            <div style={{ marginTop: '2rem' }}>
+                <button
+                  aria-label="Share audit results"
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/shares', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ tools: selectedTools }),
+                      });
+                      if (!response.ok) throw new Error('Share failed');
+                      const data = await response.json();
+                      const shareUrl = `${window.location.origin}/share/${data.id}`;
+                      await navigator.clipboard.writeText(shareUrl);
+                      if (typeof window !== 'undefined' && (window as any).gtag) {
+                        (window as any).gtag('event', 'share_link_copied', {
+                          method: 'clipboard',
+                          toolCount: selectedTools.length,
+                        });
+                      }
+                      alert('Share link copied to clipboard!');
+                    } catch (e) {
+                      alert('Unable to generate share link');
+                    }
+                  }}
+                  className={styles.backButton}
+                  style={{ width: 'auto', display: 'inline-block', padding: '0.75rem 2rem' }}
+                >
+                  🔗 Share Results
+                </button>
+            </div>
+          </div>
+
+          <button
+            onClick={() => {
+              setHasCalculated(false);
+              setSummary('');
+            }}
+            className={styles.backButton}
+          >
+            ← Back to Configuration
+          </button>
+
+          {leadCaptureVisible && (
+            <div className={styles.modalOverlay}>
+              <div className={styles.modalContent}>
+                <h3 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '1rem' }}>
+                  {optimizationResult.totalMonthlySavings > 500
+                    ? 'Unlock These Savings'
+                    : 'Stay Optimized'}
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.6 }}>
+                  {optimizationResult.totalMonthlySavings > 500
+                    ? 'Book a consultation with our optimization experts to implement these savings across your entire organization.'
+                    : 'Get notified when new tools and plans launch that could save you money.'}
+                </p>
+                <LeadCaptureForm
+                  onSubmit={handleLeadSubmit}
+                  isLoading={isSubmittingLead}
+                  errorMessage={leadCaptureError}
+                />
+                <button
+                  onClick={() => setLeadCaptureVisible(false)}
+                  style={{ width: '100%', padding: '1rem', marginTop: '1rem', color: 'var(--text-secondary)' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      <footer style={{ textAlign: 'center', marginTop: '6rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+        <p>Powered by Credex intelligence.</p>
+      </footer>
     </div>
   );
 }

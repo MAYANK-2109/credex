@@ -4,7 +4,7 @@ export async function generateOptimizationSummary(
   result: any,
   teamSize: number,
   primaryUseCase: UseCase,
-  timeoutMs: number = 5000
+  _timeoutMs: number = 5000
 ): Promise<{ text: string }> {
   // Mock response for the time being
   return new Promise((resolve) => {

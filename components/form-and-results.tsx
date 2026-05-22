@@ -3,6 +3,7 @@
 import React from 'react';
 import { ChevronDown, Trash2 } from 'lucide-react';
 import type { UseCase, ToolConfig, Recommendation } from '@/lib/optimization-engine';
+import styles from './credex.module.css';
 
 /* ============================================================================
    INPUT COMPONENTS
@@ -15,17 +16,16 @@ interface TeamSizeInputProps {
 
 export function TeamSizeInput({ value, onChange }: TeamSizeInputProps) {
   return (
-    <div className="space-y-2">
-      <label className="block text-sm font-semibold text-slate-900">
-        Team Size
-      </label>
+    <div className={styles.formGroup}>
+      <label htmlFor="team-size" className={styles.label}>Team Size</label>
       <input
+        id="team-size"
         type="number"
         min="1"
         max="500"
         value={value}
         onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))}
-        className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-accent-600 focus:outline-none focus:ring-2 focus:ring-accent-100"
+        className={styles.input}
       />
     </div>
   );
@@ -40,15 +40,15 @@ export function UseCaseSelect({ value, onChange }: UseCaseSelectProps) {
   const usecases: UseCase[] = ['coding', 'writing', 'data', 'research', 'mixed'];
 
   return (
-    <div className="space-y-2">
-      <label className="block text-sm font-semibold text-slate-900">
-        Primary Use Case
-      </label>
-      <div className="relative">
+    <div className={styles.formGroup}>
+      <label htmlFor="usecase" className={styles.label}>Primary Use Case</label>
+      <div style={{ position: 'relative' }}>
         <select
+          id="usecase"
           value={value}
           onChange={(e) => onChange(e.target.value as UseCase)}
-          className="w-full appearance-none rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-accent-600 focus:outline-none focus:ring-2 focus:ring-accent-100"
+          className={styles.input}
+          style={{ appearance: 'none', paddingRight: '2rem' }}
         >
           {usecases.map((uc) => (
             <option key={uc} value={uc}>
@@ -56,7 +56,10 @@ export function UseCaseSelect({ value, onChange }: UseCaseSelectProps) {
             </option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+        <ChevronDown 
+          style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-secondary)' }} 
+          size={16} 
+        />
       </div>
     </div>
   );
@@ -74,56 +77,26 @@ interface ToolGridProps {
 }
 
 const TOOL_OPTIONS = [
-  {
-    name: 'Cursor',
-    plans: ['Hobby', 'Pro', 'Business', 'Enterprise'],
-  },
-  {
-    name: 'GitHub Copilot',
-    plans: ['Individual', 'Business', 'Enterprise'],
-  },
-  {
-    name: 'Claude',
-    plans: ['Free', 'Pro', 'Max', 'Team', 'Enterprise', 'APIdirect'],
-  },
-  {
-    name: 'ChatGPT',
-    plans: ['Plus', 'Team', 'Enterprise', 'APIdirect'],
-  },
-  {
-    name: 'Anthropic API',
-    plans: ['APIdirect'],
-  },
-  {
-    name: 'OpenAI API',
-    plans: ['APIdirect'],
-  },
-  {
-    name: 'Gemini',
-    plans: ['Pro', 'Ultra', 'API'],
-  },
-  {
-    name: 'Windsurf',
-    plans: ['Standard'],
-  },
+  { name: 'Cursor', plans: ['Hobby', 'Pro', 'Business', 'Enterprise'] },
+  { name: 'GitHub Copilot', plans: ['Individual', 'Business', 'Enterprise'] },
+  { name: 'Claude', plans: ['Free', 'Pro', 'Max', 'Team', 'Enterprise', 'APIdirect'] },
+  { name: 'ChatGPT', plans: ['Plus', 'Team', 'Enterprise', 'APIdirect'] },
+  { name: 'Anthropic API', plans: ['APIdirect'] },
+  { name: 'OpenAI API', plans: ['APIdirect'] },
+  { name: 'Gemini', plans: ['Pro', 'Ultra', 'API'] },
+  { name: 'Windsurf', plans: ['Standard'] },
+  { name: 'v0', plans: ['Free', 'Premium', 'Enterprise'] },
 ];
 
-export function ToolGrid({
-  selectedTools,
-  onAdd,
-  onRemove,
-  onUpdate,
-}: ToolGridProps) {
+export function ToolGrid({ selectedTools, onAdd, onRemove, onUpdate }: ToolGridProps) {
   const selectedToolNames = new Set(selectedTools.map((t) => t.toolName));
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-slate-900">
-        Active Tools & Plans
-      </h3>
-
+    <div>
+      <div className={styles.label} style={{ marginBottom: '1rem' }}>Active Tools & Plans</div>
+      
       {/* Available tools grid */}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+      <div className={styles.toolGrid}>
         {TOOL_OPTIONS.map((tool) => {
           const isSelected = selectedToolNames.has(tool.name);
           return (
@@ -142,11 +115,7 @@ export function ToolGrid({
                   });
                 }
               }}
-              className={`rounded-lg border-2 px-3 py-2 text-xs font-medium transition-all ${
-                isSelected
-                  ? 'border-accent-600 bg-accent-50 text-accent-700'
-                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
-              }`}
+              className={`${styles.toolButton} ${isSelected ? styles.toolButtonActive : ''}`}
             >
               {tool.name}
             </button>
@@ -155,79 +124,63 @@ export function ToolGrid({
       </div>
 
       {/* Selected tools config cards */}
-      <div className="space-y-3">
+      <div style={{ marginTop: '2rem' }}>
         {selectedTools.map((tool) => {
           const toolDef = TOOL_OPTIONS.find((t) => t.name === tool.toolName);
           return (
-            <div
-              key={tool.toolId}
-              className="rounded-lg border border-slate-200 bg-slate-50 p-4"
-            >
-              <div className="mb-3 flex items-center justify-between">
-                <h4 className="text-sm font-semibold text-slate-900">
-                  {tool.toolName}
-                </h4>
-                <button
-                  onClick={() => onRemove(tool.toolId)}
-                  className="text-slate-400 hover:text-red-500"
-                >
-                  <Trash2 className="h-4 w-4" />
+            <div key={tool.toolId} className={styles.toolConfigCard}>
+              <div className={styles.toolConfigHeader}>
+                <span className={styles.toolConfigTitle}>{tool.toolName}</span>
+                <button onClick={() => onRemove(tool.toolId)} className={styles.removeBtn}>
+                  <Trash2 size={18} />
                 </button>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3">
-                {/* Plan selector */}
-                <div>
-                  <label className="text-xs text-slate-600">Plan</label>
-                  <div className="relative">
+              <div className={styles.configGrid}>
+                <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                  <label htmlFor={`plan-${tool.toolId}`} className={styles.label} style={{ fontSize: '0.75rem' }}>Plan</label>
+                  <div style={{ position: 'relative' }}>
                     <select
+                      id={`plan-${tool.toolId}`}
                       value={tool.plan}
-                      onChange={(e) =>
-                        onUpdate(tool.toolId, { plan: e.target.value })
-                      }
-                      className="mt-1 w-full appearance-none rounded border border-slate-300 bg-white px-2 py-1 text-xs focus:border-accent-600 focus:outline-none"
+                      onChange={(e) => onUpdate(tool.toolId, { plan: e.target.value })}
+                      className={styles.input}
+                      style={{ padding: '0.5rem', appearance: 'none', paddingRight: '1.5rem' }}
+                      aria-label={`Plan for ${tool.toolName}`}
                     >
                       {toolDef?.plans.map((plan) => (
-                        <option key={plan} value={plan}>
-                          {plan}
-                        </option>
+                        <option key={plan} value={plan}>{plan}</option>
                       ))}
                     </select>
-                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-500" />
+                    <ChevronDown size={12} style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                   </div>
                 </div>
 
-                {/* Monthly spend */}
-                <div>
-                  <label className="text-xs text-slate-600">
-                    Monthly Spend ($)
-                  </label>
+                <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                  <label htmlFor={`spend-${tool.toolId}`} className={styles.label} style={{ fontSize: '0.75rem' }}>Monthly Spend ($)</label>
                   <input
+                    id={`spend-${tool.toolId}`}
                     type="number"
                     min="0"
                     value={tool.monthlySpend}
-                    onChange={(e) =>
-                      onUpdate(tool.toolId, {
-                        monthlySpend: Math.max(0, parseInt(e.target.value) || 0),
-                      })
-                    }
-                    className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-xs focus:border-accent-600 focus:outline-none"
+                    onChange={(e) => onUpdate(tool.toolId, { monthlySpend: Math.max(0, parseInt(e.target.value) || 0) })}
+                    className={styles.input}
+                    style={{ padding: '0.5rem' }}
+                    aria-label={`Monthly spend for ${tool.toolName}`}
                   />
                 </div>
 
-                {/* Seats */}
-                <div>
-                  <label className="text-xs text-slate-600">Seats</label>
+                <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                  <label htmlFor={`seats-${tool.toolId}`} className={styles.label} style={{ fontSize: '0.75rem' }}>Seats</label>
                   <input
+                    id={`seats-${tool.toolId}`}
                     type="number"
                     min="1"
                     value={tool.seats}
-                    onChange={(e) =>
-                      onUpdate(tool.toolId, {
-                        seats: Math.max(1, parseInt(e.target.value) || 1),
-                      })
-                    }
-                    className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-xs focus:border-accent-600 focus:outline-none"
+                    onChange={(e) => onUpdate(tool.toolId, { seats: Math.max(1, parseInt(e.target.value) || 1) })}
+                    className={styles.input}
+                    style={{ padding: '0.5rem' }}
+                    aria-label={`Seats for ${tool.toolName}`}
                   />
                 </div>
               </div>
@@ -248,25 +201,20 @@ interface ResultsHeroBannerProps {
   annualSavings: number;
 }
 
-export function ResultsHeroBanner({
-  monthlySavings,
-  annualSavings,
-}: ResultsHeroBannerProps) {
+export function ResultsHeroBanner({ monthlySavings, annualSavings }: ResultsHeroBannerProps) {
   return (
-    <div className="rounded-xl bg-gradient-to-br from-accent-600 to-accent-700 p-8 text-white shadow-lg sm:p-12">
-      <h2 className="mb-2 text-sm font-medium uppercase tracking-wide opacity-90">
-        Total Potential Savings
-      </h2>
-      <div className="grid gap-6 sm:grid-cols-2">
+    <div className={styles.heroBanner}>
+      <h2 className={styles.heroLabel}>Total Potential Savings</h2>
+      <div className={styles.metricsGrid}>
         <div>
-          <p className="text-sm opacity-75">Monthly</p>
-          <p className="text-4xl font-bold sm:text-5xl">
+          <p className={styles.metricLabel}>Monthly</p>
+          <p className={`${styles.metricValue} ${monthlySavings > 500 ? styles.highlight : ''}`}>
             ${monthlySavings.toLocaleString()}
           </p>
         </div>
         <div>
-          <p className="text-sm opacity-75">Annually</p>
-          <p className="text-4xl font-bold sm:text-5xl">
+          <p className={styles.metricLabel}>Annually</p>
+          <p className={`${styles.metricValue} ${annualSavings > 6000 ? styles.highlight : ''}`}>
             ${annualSavings.toLocaleString()}
           </p>
         </div>
@@ -279,56 +227,33 @@ interface RecommendationCardProps {
   recommendation: Recommendation;
 }
 
-export function RecommendationCard({
-  recommendation,
-}: RecommendationCardProps) {
+export function RecommendationCard({ recommendation }: RecommendationCardProps) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
-      <div className="mb-4 flex items-start justify-between">
-        <div>
-          <h3 className="font-semibold text-slate-900">
-            {recommendation.toolName}
-          </h3>
-          <p className="mt-1 text-sm text-slate-600">
-            Current: ${recommendation.currentSpend.toLocaleString()}/mo
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs font-semibold uppercase tracking-wide text-green-600">
-            Save
-          </p>
-          <p className="text-2xl font-bold text-green-600">
-            ${recommendation.monthlySavings.toLocaleString()}
-          </p>
-        </div>
-      </div>
-
-      <div className="mb-3 space-y-1">
-        <p className="text-sm font-medium text-slate-700">
-          {recommendation.recommendedAction}
+    <div className={styles.recCard}>
+      <div style={{ flex: 1 }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem' }}>{recommendation.toolName}</h3>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>
+          Current Spend: ${recommendation.currentSpend.toLocaleString()}/mo
         </p>
+        <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{recommendation.recommendedAction}</p>
+        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{recommendation.reason}</p>
       </div>
-
-      <p className="text-xs text-slate-500">{recommendation.reason}</p>
+      <div style={{ textAlign: 'right', paddingLeft: '2rem' }}>
+        <p className={styles.recSaveLabel}>Save</p>
+        <p className={styles.recSaveAmount}>${recommendation.monthlySavings.toLocaleString()}</p>
+      </div>
     </div>
   );
 }
 
-interface OptimizedStateMessageProps {
-  savings: number;
-}
-
-export function OptimizedStateMessage({ savings }: OptimizedStateMessageProps) {
-  if (savings > 100) return null; // Show only when optimized
-
+export function OptimizedStateMessage({ savings }: { savings: number }) {
+  if (savings > 100) return null;
   return (
-    <div className="rounded-lg border border-green-200 bg-green-50 p-6 text-center">
-      <p className="font-semibold text-green-900">
-        ✓ You&apos;re spending well. Your stack is fully optimized.
-      </p>
-      <p className="mt-2 text-sm text-green-700">
-        Continue to monitor quarterly as your team evolves.
-      </p>
+    <div className={styles.optimizedMessage}>
+      <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+        ✨ You're spending well
+      </h3>
+      <p>Your AI tooling stack is currently optimized. Continue monitoring quarterly as your team evolves.</p>
     </div>
   );
 }
@@ -337,36 +262,31 @@ export function OptimizedStateMessage({ savings }: OptimizedStateMessageProps) {
    CTA COMPONENTS
    ============================================================================ */
 
-interface SavingsCTAProps {
+export function SavingsCTA({ savings, onConsultationClick, onNotifyClick }: {
   savings: number;
   onConsultationClick: () => void;
   onNotifyClick: () => void;
-}
-
-export function SavingsCTA({
-  savings,
-  onConsultationClick,
-  onNotifyClick,
-}: SavingsCTAProps) {
+}) {
   if (savings > 500) {
     return (
-      <button
-        onClick={onConsultationClick}
-        className="w-full rounded-lg bg-accent-600 px-6 py-3 font-semibold text-white transition-all hover:bg-accent-700 hover:shadow-lg active:scale-95"
-      >
-        Book a Credex Consultation
-      </button>
+      <div style={{ marginTop: '3rem', textAlign: 'center' }}>
+        <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--accent-neon)' }}>
+          Stop overpaying for AI tooling.
+        </h3>
+        <button onClick={onConsultationClick} className={styles.primaryButton}>
+          Book a Credex Consultation
+        </button>
+      </div>
     );
   }
 
-  if (savings < 100) {
+  if (savings <= 100) {
     return (
-      <button
-        onClick={onNotifyClick}
-        className="w-full rounded-lg border-2 border-slate-300 px-6 py-3 font-semibold text-slate-700 transition-all hover:border-slate-400 hover:bg-slate-50"
-      >
-        Notify me when new optimizations apply
-      </button>
+      <div style={{ marginTop: '3rem', textAlign: 'center' }}>
+        <button onClick={onNotifyClick} className={styles.primaryButton} style={{ background: 'rgba(255, 255, 255, 0.1)', boxShadow: 'none' }}>
+          Notify me when new optimizations apply
+        </button>
+      </div>
     );
   }
 
@@ -377,78 +297,89 @@ export function SavingsCTA({
    LEAD CAPTURE FORM
    ============================================================================ */
 
-interface LeadCaptureFormProps {
-  onSubmit: (data: LeadCaptureData) => void;
-  isLoading: boolean;
-  errorMessage?: string;
-}
-
 export interface LeadCaptureData {
   email: string;
   companyName: string;
   role: string;
+  rating: number;
   honeypot: string;
 }
 
-export function LeadCaptureForm({
-  onSubmit,
-  isLoading,
-  errorMessage,
-}: LeadCaptureFormProps) {
+export function LeadCaptureForm({ onSubmit, isLoading, errorMessage }: {
+  onSubmit: (data: LeadCaptureData) => void;
+  isLoading: boolean;
+  errorMessage?: string;
+}) {
   const [formData, setFormData] = React.useState<LeadCaptureData>({
     email: '',
     companyName: '',
     role: '',
+    rating: 4,
     honeypot: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Honeypot check
-    if (formData.honeypot) {
-      console.log('Honeypot triggered');
-      return;
-    }
-
-    // Email validation
-    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      return;
-    }
-
+    if (formData.honeypot) return;
+    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) return;
     onSubmit(formData);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <input
-        type="text"
-        placeholder="Full Name"
-        value={formData.role}
-        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-        className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-accent-600 focus:outline-none"
-      />
+    <form onSubmit={handleSubmit}>
+      <div className={styles.formGroup}>
+        <label htmlFor="audit-rating" className={styles.label} style={{ marginBottom: '0.5rem' }}>
+          How useful was this audit?
+        </label>
+        <select
+          id="audit-rating"
+          value={formData.rating}
+          onChange={(e) => setFormData({ ...formData, rating: Number(e.target.value) })}
+          className={styles.input}
+          style={{ appearance: 'none' }}
+        >
+          {[5, 4, 3, 2, 1].map((score) => (
+            <option key={score} value={score}>
+              {score} / 5
+            </option>
+          ))}
+        </select>
+      </div>
 
-      <input
-        type="email"
-        placeholder="Email (required)"
-        value={formData.email}
-        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-        required
-        className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-accent-600 focus:outline-none"
-      />
-
-      <input
-        type="text"
-        placeholder="Company Name"
-        value={formData.companyName}
-        onChange={(e) =>
-          setFormData({ ...formData, companyName: e.target.value })
-        }
-        className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-accent-600 focus:outline-none"
-      />
-
-      {/* Honeypot field */}
+      <div className={styles.formGroup}>
+        <input
+          id="role"
+          type="text"
+          placeholder="Role (Optional)"
+          value={formData.role}
+          onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+          className={styles.input}
+          aria-label="Role"
+        />
+      </div>
+      <div className={styles.formGroup}>
+        <input
+          id="email"
+          type="email"
+          placeholder="Email Address"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          required
+          className={styles.input}
+          aria-label="Email Address"
+        />
+      </div>
+      <div className={styles.formGroup}>
+        <input
+          id="company"
+          type="text"
+          placeholder="Company Name (Optional)"
+          value={formData.companyName}
+          onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+          className={styles.input}
+          aria-label="Company Name"
+        />
+      </div>
       <input
         type="text"
         name="website"
@@ -457,17 +388,9 @@ export function LeadCaptureForm({
         onChange={(e) => setFormData({ ...formData, honeypot: e.target.value })}
         tabIndex={-1}
       />
-
-      {errorMessage && (
-        <p className="text-sm text-red-600">{errorMessage}</p>
-      )}
-
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white transition-all hover:bg-slate-800 disabled:opacity-50"
-      >
-        {isLoading ? 'Submitting...' : 'Download Full Report'}
+      {errorMessage && <p style={{ color: 'var(--accent-pink)', fontSize: '0.875rem', marginBottom: '1rem' }}>{errorMessage}</p>}
+      <button type="submit" disabled={isLoading} className={styles.primaryButton}>
+        {isLoading ? 'Submitting...' : 'Submit'}
       </button>
     </form>
   );
