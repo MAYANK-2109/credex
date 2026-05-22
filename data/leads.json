@@ -52,5 +52,32 @@
     "primaryUseCase": "coding",
     "toolCount": 2,
     "timestamp": "2026-05-22T17:02:18.523Z"
+  },
+  {
+    "email": "test@example.com",
+    "companyName": "Acme",
+    "role": "Product",
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 2,
+    "timestamp": "2026-05-22T18:47:26.146Z"
+  },
+  {
+    "email": "test@example.com",
+    "companyName": "Acme",
+    "role": "Product",
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 2,
+    "timestamp": "2026-05-22T18:50:21.381Z"
+  },
+  {
+    "email": "mayank122mayank122@gmail.com",
+    "companyName": "google",
+    "role": "web devloper ",
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 2,
+    "timestamp": "2026-05-22T18:50:49.806Z"
   }
 ]
