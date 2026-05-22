@@ -6,6 +6,7 @@ import {
   RecommendationCard,
   OptimizedStateMessage,
   SavingsCTA,
+
 } from './form-and-results';
 import React from 'react';
 
@@ -32,6 +33,58 @@ export function AnimatedResultsSequence({
             monthlySavings={optimizationResult.totalMonthlySavings}
             annualSavings={optimizationResult.totalAnnualSavings}
           />
+        </div>
+
+        <div style={{ width: '100%', marginBottom: '2rem' }}>
+          <div className="glass-panel" style={{ padding: '2rem' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.75rem' }}>
+              Pricing Plan Fit & Alternatives
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+              {optimizationResult.pricingFitAnswers?.map((a) => (
+                <div
+                  key={a.question}
+                  style={{
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: '14px',
+                    padding: '1rem',
+                    background: 'rgba(0,0,0,0.15)',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'baseline',
+                      justifyContent: 'space-between',
+                      gap: '1rem',
+                    }}
+                  >
+                    <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>{a.question}</h4>
+                    <span
+                      style={{
+                        fontSize: '0.875rem',
+                        fontWeight: 800,
+                        color:
+                          a.status === 'Yes'
+                            ? 'var(--accent-neon)'
+                            : a.status === 'No'
+                              ? 'var(--accent-pink)'
+                              : 'var(--text-secondary)',
+                      }}
+                    >
+                      {a.status}
+                    </span>
+                  </div>
+                  <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                    <strong style={{ color: 'var(--text-primary)' }}>Evidence:</strong> {a.evidence}
+                  </p>
+                  <p style={{ margin: '0.5rem 0 0', fontWeight: 700 }}>
+                    Recommendation: <span style={{ fontWeight: 600 }}>{a.recommendation}</span>
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div style={{ width: '100%', marginBottom: '2rem' }}>
