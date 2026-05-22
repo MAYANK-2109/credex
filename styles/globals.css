@@ -1,21 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
 
 :root {
-  --bg-primary: #0a0a0b;
-  --bg-secondary: #121214;
-  --text-primary: #ffffff;
-  --text-secondary: #a1a1aa;
+  --bg-primary: #f9fafb;
+  --bg-secondary: #ffffff;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
   
-  --accent-neon: #00f0ff;
-  --accent-pink: #ff0055;
-  --accent-purple: #7000ff;
+  --accent-primary: #20c997;
+  --accent-secondary: #10b981;
+  --accent-purple: #7c3aed;
+  --accent-neon: #0ae5ff;
+  --accent-pink: #ec4899;
+  --accent-blue: #3b82f6;
   --success-green: #10b981;
   --warning-orange: #f59e0b;
   
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.05);
+  --border-light: #e5e7eb;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   
-  --font-sans: 'Outfit', sans-serif;
+  --font-display: 'Playfair Display', serif;
+  --font-sans: 'Inter', sans-serif;
 }
 
 * {
@@ -31,15 +37,13 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
-  background-image: 
-    radial-gradient(circle at 15% 50%, rgba(112, 0, 255, 0.08), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(0, 240, 255, 0.08), transparent 25%);
-  background-attachment: fixed;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   line-height: 1.2;
+  font-family: var(--font-display);
+  color: var(--text-primary);
 }
 
 a {
@@ -58,24 +62,21 @@ input, select {
   font-family: inherit;
 }
 
-/* Utilities for new components */
+/* Professional card styles */
 .glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  padding: 1.5rem;
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--accent-neon), var(--accent-purple));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent-primary);
+  font-weight: 700;
 }
 
 .gradient-bg {
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-neon));
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   color: white;
 }

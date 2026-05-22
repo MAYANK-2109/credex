@@ -161,7 +161,7 @@ function checkCrossToolRedundancy(
   const claudeConfig = configs.find((c) => c.toolName === 'Claude');
   const chatGptConfig = configs.find((c) => c.toolName === 'ChatGPT');
 
-  if (hasCursor && copilotConfig) {
+  if (hasCursor && copilotConfig && copilotConfig.monthlySpend > 0) {
     const suggestedSavings = Math.round(copilotConfig.monthlySpend * 0.75);
     return {
       toolId: copilotConfig.toolId,
@@ -175,7 +175,7 @@ function checkCrossToolRedundancy(
     };
   }
 
-  if (claudeConfig && chatGptConfig && primaryUseCase === 'research') {
+  if (claudeConfig && chatGptConfig && primaryUseCase === 'research' && chatGptConfig.monthlySpend > 0) {
     const suggestedSavings = Math.round(chatGptConfig.monthlySpend * 0.5);
     return {
       toolId: chatGptConfig.toolId,
@@ -263,6 +263,21 @@ export function optimizeToolStack(
   if (crossRedundancy) {
     recommendations.push(crossRedundancy);
     seenToolIds.add(crossRedundancy.toolId);
+  }
+
+  // If no recommendations yet, check if any tools have $0 spend
+  if (recommendations.length === 0) {
+    const zeroSpendTool = tools.find((t) => t.monthlySpend === 0);
+    if (zeroSpendTool) {
+      recommendations.push({
+        toolId: zeroSpendTool.toolId,
+        toolName: zeroSpendTool.toolName,
+        currentSpend: 0,
+        recommendedAction: `Enter actual monthly spend for ${zeroSpendTool.toolName} ${zeroSpendTool.plan}`,
+        monthlySavings: 0,
+        reason: 'No spend detected. Enter your actual monthly spend to unlock optimization recommendations.',
+      });
+    }
   }
 
   const totalMonthlySavings = recommendations.reduce(

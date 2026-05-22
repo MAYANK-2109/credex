@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { ChevronDown, Trash2 } from 'lucide-react';
 import type { UseCase, ToolConfig, Recommendation } from '@/lib/optimization-engine';
 import styles from './credex.module.css';
@@ -225,9 +225,10 @@ export function ResultsHeroBanner({ monthlySavings, annualSavings }: ResultsHero
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
+  index?: number;
 }
 
-export function RecommendationCard({ recommendation }: RecommendationCardProps) {
+export function RecommendationCard({ recommendation, index = 0 }: RecommendationCardProps) {
   return (
     <div className={styles.recCard}>
       <div style={{ flex: 1 }}>

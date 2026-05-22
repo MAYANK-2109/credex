@@ -1,17 +1,15 @@
 'use client';
 
+import './page.css';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   TeamSizeInput,
   UseCaseSelect,
   ToolGrid,
-  ResultsHeroBanner,
-  RecommendationCard,
-  OptimizedStateMessage,
-  SavingsCTA,
   LeadCaptureForm,
   type LeadCaptureData,
 } from '@/components/form-and-results';
+import { AnimatedResultsSequence } from '@/components/animated-results-sequence';
 import {
   optimizeToolStack,
   type UseCase,
@@ -210,88 +208,35 @@ export default function OptimizerPage() {
       ) : null}
 
       {hasCalculated && optimizationResult ? (
-        <div id="results-section" style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <ResultsHeroBanner
-            monthlySavings={optimizationResult.totalMonthlySavings}
-            annualSavings={optimizationResult.totalAnnualSavings}
+        <div id="results-section">
+          {/* ANIMATED RESULTS SEQUENCE with GSAP ScrollTrigger */}
+          <AnimatedResultsSequence
+            optimizationResult={optimizationResult}
+            savings={optimizationResult.totalMonthlySavings}
+            onConsultationClick={() => setLeadCaptureVisible(true)}
+            onNotifyClick={() => setLeadCaptureVisible(true)}
           />
 
-          <div style={{ marginTop: '4rem', marginBottom: '4rem' }}>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>AI Stack Analysis</h3>
-            <div className={styles.summaryBox}>
-              {isSummaryLoading ? (
-                <div style={{ opacity: 0.5, animation: 'pulse 2s infinite' }}>Analyzing your tooling matrix...</div>
-              ) : (
-                <p>{summary}</p>
-              )}
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '4rem' }}>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Actionable Insights</h3>
-            {optimizationResult.isFullyOptimized ? (
-              <OptimizedStateMessage savings={optimizationResult.totalMonthlySavings} />
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {optimizationResult.recommendations.map((rec) => (
-                  <RecommendationCard key={rec.toolId} recommendation={rec} />
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
-            <SavingsCTA
-              savings={optimizationResult.totalMonthlySavings}
-              onConsultationClick={() => setLeadCaptureVisible(true)}
-              onNotifyClick={() => setLeadCaptureVisible(true)}
-            />
-            
-            <div style={{ marginTop: '2rem' }}>
-                <button
-                  aria-label="Share audit results"
-                  onClick={async () => {
-                    try {
-                      const response = await fetch('/api/shares', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ tools: selectedTools }),
-                      });
-                      if (!response.ok) throw new Error('Share failed');
-                      const data = await response.json();
-                      const shareUrl = `${window.location.origin}/share/${data.id}`;
-                      await navigator.clipboard.writeText(shareUrl);
-                      if (typeof window !== 'undefined' && (window as any).gtag) {
-                        (window as any).gtag('event', 'share_link_copied', {
-                          method: 'clipboard',
-                          toolCount: selectedTools.length,
-                        });
-                      }
-                      alert('Share link copied to clipboard!');
-                    } catch (e) {
-                      alert('Unable to generate share link');
-                    }
-                  }}
-                  className={styles.backButton}
-                  style={{ width: 'auto', display: 'inline-block', padding: '0.75rem 2rem' }}
-                >
-                  🔗 Share Results
-                </button>
-            </div>
-          </div>
-
+          {/* BACK TO CONFIGURATION BUTTON - Fixed positioning for accessibility */}
           <button
             onClick={() => {
               setHasCalculated(false);
               setSummary('');
             }}
             className={styles.backButton}
+            style={{
+              position: 'fixed',
+              bottom: '2rem',
+              left: '2rem',
+              zIndex: 20,
+            }}
           >
             ← Back to Configuration
           </button>
 
+          {/* LEAD CAPTURE MODAL */}
           {leadCaptureVisible && (
-            <div className={styles.modalOverlay}>
+            <div className={styles.modalOverlay} style={{ zIndex: 100 }}>
               <div className={styles.modalContent}>
                 <h3 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '1rem' }}>
                   {optimizationResult.totalMonthlySavings > 500

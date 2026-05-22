@@ -7,6 +7,11 @@ export const metadata = {
   description: 'Run a free audit of your AI tool stack, uncover redundant spend, and capture savings opportunities.',
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
+
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID || '';
 
 export default function RootLayout({

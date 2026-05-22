@@ -23,5 +23,23 @@
     "id": "899e5e11",
     "tools": [],
     "createdAt": "2026-05-21T19:28:36.640Z"
+  },
+  {
+    "id": "d439db95",
+    "tools": [
+      {
+        "toolId": "gemini",
+        "toolName": "Gemini",
+        "plan": "API",
+        "monthlySpend": 800,
+        "seats": 14
+      }
+    ],
+    "createdAt": "2026-05-22T12:08:58.810Z"
+  },
+  {
+    "id": "66cd775c",
+    "tools": [],
+    "createdAt": "2026-05-22T17:02:18.530Z"
   }
 ]

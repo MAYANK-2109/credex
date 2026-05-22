@@ -35,7 +35,7 @@ export default function LandingPage() {
           <iframe
             width="100%"
             height="420"
-            src="https://www.youtube.com/embed/ysz5S6PUM-U"
+            src="https://youtu.be/h8F9lsw-qb4?si=A3O2h1U47-iTuw7M"
             title="AI Spend Audit explainer video"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
