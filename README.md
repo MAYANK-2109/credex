@@ -89,7 +89,7 @@ See [Financial Model](docs/finance-model.md) for savings calculation details and
 **No Seat-Level Segmentation**
 - Trade-off: Recommendations apply uniformly to all seats; no per-team/per-role optimization
 - Rationale: Scope explosion; most SMBs have 2–20 people with similar needs
-- Future: Add team/department filters when customer feedback demands this
+- Future: Add team/department filters when customer feedback demands this.
 
 ## Notes
 
