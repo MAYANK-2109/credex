@@ -88,7 +88,9 @@ export default async function SharedResultPage({ params }: SharePageProps) {
         />
 
         <div style={{ marginTop: '4rem', marginBottom: '4rem' }}>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Actionable Insights</h3>
+          <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>
+            Actionable Insights
+          </h3>
           {optimizationResult.isFullyOptimized ? (
             <OptimizedStateMessage savings={optimizationResult.totalMonthlySavings} />
           ) : (

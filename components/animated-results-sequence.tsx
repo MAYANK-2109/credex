@@ -1,7 +1,12 @@
 'use client';
 
 import type { OptimizationResult } from '@/lib/optimization-engine';
-import { ResultsHeroBanner, RecommendationCard, OptimizedStateMessage, SavingsCTA } from './form-and-results';
+import {
+  ResultsHeroBanner,
+  RecommendationCard,
+  OptimizedStateMessage,
+  SavingsCTA,
+} from './form-and-results';
 import React from 'react';
 
 interface AnimatedResultsSequenceProps {
@@ -35,9 +40,9 @@ export function AnimatedResultsSequence({
               AI Stack Analysis
             </h3>
             <p style={{ color: 'var(--text-secondary)' }}>
-              Based on your team configuration, we've analyzed your tool stack for redundancies
-              and optimization opportunities. The recommendations below highlight specific actions
-              you can take to reduce costs while maintaining or improving productivity.
+              Based on your team configuration, we've analyzed your tool stack for redundancies and
+              optimization opportunities. The recommendations below highlight specific actions you
+              can take to reduce costs while maintaining or improving productivity.
             </p>
           </div>
         </div>
@@ -58,7 +63,6 @@ export function AnimatedResultsSequence({
               </div>
             ))
           )}
-
         </div>
 
         <div style={{ width: '100%', marginTop: '2rem' }}>
@@ -72,4 +76,3 @@ export function AnimatedResultsSequence({
     </div>
   );
 }
-

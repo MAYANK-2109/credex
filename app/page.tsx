@@ -11,11 +11,7 @@ import {
 } from '@/components/form-and-results';
 import { AnimatedResultsSequence } from '@/components/animated-results-sequence';
 
-import {
-  optimizeToolStack,
-  type UseCase,
-  type ToolConfig,
-} from '@/lib/optimization-engine';
+import { optimizeToolStack, type UseCase, type ToolConfig } from '@/lib/optimization-engine';
 import { generateOptimizationSummary } from '@/lib/llm-service';
 import { storageUtils, type FormState } from '@/lib/storage-utils';
 import styles from '@/components/credex.module.css';
@@ -66,15 +62,8 @@ export default function OptimizerPage() {
     setSelectedTools(selectedTools.filter((t) => t.toolId !== toolId));
   };
 
-  const handleUpdateTool = (
-    toolId: string,
-    updates: Partial<ToolConfig>
-  ) => {
-    setSelectedTools(
-      selectedTools.map((t) =>
-        t.toolId === toolId ? { ...t, ...updates } : t
-      )
-    );
+  const handleUpdateTool = (toolId: string, updates: Partial<ToolConfig>) => {
+    setSelectedTools(selectedTools.map((t) => (t.toolId === toolId ? { ...t, ...updates } : t)));
   };
 
   const handleCalculate = async () => {
@@ -103,9 +92,7 @@ export default function OptimizerPage() {
     }
 
     setTimeout(() => {
-      document
-        .getElementById('results-section')
-        ?.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   };
 
@@ -156,7 +143,7 @@ export default function OptimizerPage() {
         });
       }
 
-      alert('Thank you! We\'ll be in touch soon.');
+      alert("Thank you! We'll be in touch soon.");
       setLeadCaptureVisible(false);
     } catch (_error) {
       setLeadCaptureError('Failed to submit. Please try again.');
@@ -167,9 +154,7 @@ export default function OptimizerPage() {
 
   const optimizationResult = useMemo(
     () =>
-      selectedTools.length > 0
-        ? optimizeToolStack(selectedTools, teamSize, primaryUseCase)
-        : null,
+      selectedTools.length > 0 ? optimizeToolStack(selectedTools, teamSize, primaryUseCase) : null,
     [selectedTools, teamSize, primaryUseCase]
   );
 
@@ -184,12 +169,16 @@ export default function OptimizerPage() {
           AI Spend <span className="gradient-text">Audit</span>
         </h1>
         <p className={styles.subtitle}>
-          Stop wasting money on redundant or sub-optimal AI tool plans. Instantly audit your stack for free.
+          Stop wasting money on redundant or sub-optimal AI tool plans. Instantly audit your stack
+          for free.
         </p>
       </header>
 
       {!hasCalculated ? (
-        <div className="glass-panel" style={{ padding: '3rem', maxWidth: '800px', margin: '0 auto' }}>
+        <div
+          className="glass-panel"
+          style={{ padding: '3rem', maxWidth: '800px', margin: '0 auto' }}
+        >
           <div className={styles.grid} style={{ marginBottom: '3rem' }}>
             <TeamSizeInput value={teamSize} onChange={setTeamSize} />
             <UseCaseSelect value={primaryUseCase} onChange={setPrimaryUseCase} />
@@ -202,7 +191,11 @@ export default function OptimizerPage() {
             onUpdate={handleUpdateTool}
           />
 
-          <button onClick={handleCalculate} className={styles.primaryButton} style={{ marginTop: '2rem' }}>
+          <button
+            onClick={handleCalculate}
+            className={styles.primaryButton}
+            style={{ marginTop: '2rem' }}
+          >
             Run Instant Audit
           </button>
         </div>
@@ -244,7 +237,9 @@ export default function OptimizerPage() {
                     ? 'Unlock These Savings'
                     : 'Stay Optimized'}
                 </h3>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.6 }}>
+                <p
+                  style={{ color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.6 }}
+                >
                   {optimizationResult.totalMonthlySavings > 500
                     ? 'Book a consultation with our optimization experts to implement these savings across your entire organization.'
                     : 'Get notified when new tools and plans launch that could save you money.'}
@@ -256,7 +251,12 @@ export default function OptimizerPage() {
                 />
                 <button
                   onClick={() => setLeadCaptureVisible(false)}
-                  style={{ width: '100%', padding: '1rem', marginTop: '1rem', color: 'var(--text-secondary)' }}
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    marginTop: '1rem',
+                    color: 'var(--text-secondary)',
+                  }}
                 >
                   Cancel
                 </button>
@@ -266,7 +266,14 @@ export default function OptimizerPage() {
         </div>
       ) : null}
 
-      <footer style={{ textAlign: 'center', marginTop: '6rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+      <footer
+        style={{
+          textAlign: 'center',
+          marginTop: '6rem',
+          color: 'var(--text-secondary)',
+          fontSize: '0.875rem',
+        }}
+      >
         <p>Powered by Credex intelligence.</p>
       </footer>
     </div>
