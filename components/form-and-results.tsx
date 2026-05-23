@@ -238,6 +238,11 @@ export function RecommendationCard({ recommendation, index = 0 }: Recommendation
         </p>
         <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{recommendation.recommendedAction}</p>
         <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{recommendation.reason}</p>
+        {recommendation.paybackMonths !== undefined ? (
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+            Payback: {recommendation.paybackMonths} months
+          </p>
+        ) : null}
       </div>
       <div style={{ textAlign: 'right', paddingLeft: '2rem' }}>
         <p className={styles.recSaveLabel}>Save</p>

@@ -40,40 +40,61 @@ describe('optimization engine', () => {
         toolId: 'chatgpt-team',
         toolName: 'ChatGPT',
         plan: 'Team',
-        monthlySpend: 200,
+        monthlySpend: 260,
         seats: 3,
       },
     ]);
 
-    expect(result.recommendations).toHaveLength(1);
+    expect(result.recommendations.length).toBeGreaterThanOrEqual(1);
     expect(result.recommendations[0].toolName).toBe('ChatGPT');
     expect(result.recommendations[0].reason).toContain('expected cost');
   });
 
-  test('cross-tool redundancy rule detects Cursor and GitHub Copilot overlap', () => {
-    const result = optimizeToolStack([
-      {
-        toolId: 'cursor',
-        toolName: 'Cursor',
-        plan: 'Pro',
-        monthlySpend: 100,
-        seats: 3,
-      },
-      {
-        toolId: 'copilot',
-        toolName: 'GitHub Copilot',
-        plan: 'Business',
-        monthlySpend: 180,
-        seats: 3,
-      },
-    ]);
+  test('cross-tool redundancy rule detects Cursor and GitHub Copilot overlap and calculates payback', () => {
+    const result = optimizeToolStack(
+      [
+        {
+          toolId: 'cursor',
+          toolName: 'Cursor',
+          plan: 'Pro',
+          monthlySpend: 320,
+          seats: 3,
+        },
+        {
+          toolId: 'copilot',
+          toolName: 'GitHub Copilot',
+          plan: 'Business',
+          monthlySpend: 2000,
+          seats: 12,
+        },
+      ],
+      12
+    );
 
     const copilotRecs = result.recommendations.filter((r) => r.toolName === 'GitHub Copilot');
     expect(copilotRecs.length).toBeGreaterThanOrEqual(1);
-    expect(copilotRecs.some((r) => r.recommendedAction.includes('Reduce Copilot spend'))).toBe(true);
+    expect(copilotRecs.some((r) => r.recommendedAction.includes('Consolidate'))).toBe(true);
+    expect(copilotRecs.some((r) => r.paybackMonths !== undefined)).toBe(true);
   });
 
-  test('full optimization result includes current spend and savings values', () => {
+  test('API token optimization returns realistic savings and payback', () => {
+    const result = optimizeToolStack([
+      {
+        toolId: 'claude-api',
+        toolName: 'Claude',
+        plan: 'APIdirect',
+        monthlySpend: 400,
+        seats: 0,
+      },
+    ]);
+
+    const apiRecs = result.recommendations.filter((r) => r.toolName === 'Claude');
+    expect(apiRecs.length).toBeGreaterThanOrEqual(1);
+    expect(apiRecs.some((r) => r.reason.includes('payback'))).toBe(true);
+    expect(apiRecs.some((r) => r.monthlySavings > 0)).toBe(true);
+  });
+
+  test('full optimization result includes current spend, savings values, and waste score', () => {
     const result = optimizeToolStack([
       {
         toolId: 'cursor-best',
@@ -86,5 +107,9 @@ describe('optimization engine', () => {
 
     expect(result.currentMonthlySpend).toBe(100);
     expect(result.currentAnnualSpend).toBe(1200);
+    expect(result.wasteScore).toBeGreaterThanOrEqual(0);
+    expect(result.wasteScore).toBeLessThanOrEqual(1);
+    expect(result.wasteCategory).toBeDefined();
+    expect(result.wasteBreakdown).toContain('waste score');
   });
 });

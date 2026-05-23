@@ -10,6 +10,19 @@ export type ClaudePlan = 'Free' | 'Pro' | 'Max' | 'Team' | 'Enterprise' | 'APIdi
 export type ChatGPTPlan = 'Plus' | 'Team' | 'Enterprise' | 'APIdirect';
 export type GeminiPlan = 'Pro' | 'Ultra' | 'API';
 
+type VolumeDiscount = {
+  minSeats: number;
+  seatPrice: number;
+};
+
+type PricingTier = {
+  seatPrice?: number;
+  flatPrice?: number;
+  minSeats?: number;
+  minPrice?: number;
+  volumeDiscounts?: VolumeDiscount[];
+};
+
 export interface ToolConfig {
   toolId: string;
   toolName: string;
@@ -25,6 +38,7 @@ export interface Recommendation {
   recommendedAction: string;
   monthlySavings: number;
   reason: string;
+  paybackMonths?: number;
 }
 
 export type PricingFitDetail = {
@@ -56,13 +70,13 @@ export interface OptimizationResult {
   totalAnnualSavings: number;
   currentMonthlySpend: number;
   currentAnnualSpend: number;
+  wasteScore: number;
+  wasteCategory: string;
+  wasteBreakdown: string;
   isFullyOptimized: boolean;
 }
 
-const TOOL_PLAN_PRICING: Record<
-  string,
-  Record<string, { seatPrice?: number; flatPrice?: number; minSeats?: number }>
-> = {
+const TOOL_PLAN_PRICING: Record<string, Record<string, PricingTier>> = {
   Cursor: {
     Hobby: { flatPrice: 35 },
     Pro: { seatPrice: 20 },
@@ -71,8 +85,14 @@ const TOOL_PLAN_PRICING: Record<
   },
   'GitHub Copilot': {
     Individual: { flatPrice: 10 },
-    Business: { seatPrice: 19 },
-    Enterprise: { seatPrice: 21 },
+    Business: {
+      seatPrice: 19,
+      volumeDiscounts: [{ minSeats: 50, seatPrice: 15 }],
+    },
+    Enterprise: {
+      seatPrice: 21,
+      volumeDiscounts: [{ minSeats: 50, seatPrice: 18 }],
+    },
   },
   Claude: {
     Free: { flatPrice: 0 },
@@ -84,7 +104,7 @@ const TOOL_PLAN_PRICING: Record<
   },
   ChatGPT: {
     Plus: { flatPrice: 20 },
-    Team: { seatPrice: 20 },
+    Team: { seatPrice: 20, minPrice: 200 },
     Enterprise: { seatPrice: 30 },
     APIdirect: {},
   },
@@ -113,8 +133,25 @@ function estimateExpectedSpend(config: ToolConfig): number | null {
   const planPricing = TOOL_PLAN_PRICING[config.toolName]?.[config.plan];
   if (!planPricing) return null;
   if (planPricing.flatPrice !== undefined) return planPricing.flatPrice;
-  if (planPricing.seatPrice !== undefined) return config.seats * planPricing.seatPrice;
-  return null;
+
+  let seatPrice = planPricing.seatPrice;
+  if (seatPrice === undefined) return null;
+
+  if (planPricing.volumeDiscounts && planPricing.volumeDiscounts.length > 0) {
+    const bestVolume = planPricing.volumeDiscounts
+      .filter((discount) => config.seats >= discount.minSeats)
+      .sort((a, b) => a.seatPrice - b.seatPrice)[0];
+    if (bestVolume) {
+      seatPrice = Math.min(seatPrice, bestVolume.seatPrice);
+    }
+  }
+
+  let expected = config.seats * seatPrice;
+  if (planPricing.minPrice !== undefined && expected < planPricing.minPrice) {
+    expected = planPricing.minPrice;
+  }
+
+  return expected;
 }
 
 /**
@@ -122,17 +159,31 @@ function estimateExpectedSpend(config: ToolConfig): number | null {
  * If tool === 'Claude' && plan === 'Team' && seats < 5
  * -> Recommend downgrade to Pro
  */
-function checkClaudeTeamFloor(config: ToolConfig): Recommendation | null {
+function checkClaudeTeamFloor(config: ToolConfig, isRegulatedIndustry: boolean): Recommendation | null {
   if (config.toolName === 'Claude' && config.plan === 'Team' && config.seats < 5) {
     const recommendedSpend = config.seats * 20; // Pro tier: $20/seat
     const monthlySavings = config.monthlySpend - recommendedSpend;
+
+    if (isRegulatedIndustry) {
+      return {
+        toolId: config.toolId,
+        toolName: 'Claude',
+        currentSpend: config.monthlySpend,
+        recommendedAction: 'Do not downgrade Claude Team in regulated environments',
+        monthlySavings: 0,
+        reason:
+          'Claude Team provides audit logs, admin controls, and compliance reporting that Pro does not. Downgrading would introduce regulatory risk.',
+      };
+    }
+
     return {
       toolId: config.toolId,
       toolName: 'Claude',
       currentSpend: config.monthlySpend,
       recommendedAction: `Downgrade to Pro ($20/seat) for ${config.seats} seats`,
       monthlySavings,
-      reason: 'Claude Team tier has a strict 5-seat minimum billing floor.',
+      reason:
+        'Claude Team tier has a strict 5-seat minimum billing floor. This plan is legacy and should be evaluated for compliance needs before downgrading.',
     };
   }
   return null;
@@ -177,44 +228,146 @@ function checkPricingMismatch(config: ToolConfig): Recommendation | null {
 }
 
 /**
+ * Cursor + Copilot overlap check with switching cost and payback reasoning.
+ */
+function assessCursorCopilotOverlap(
+  configs: ToolConfig[],
+  teamSize: number,
+  primaryUseCase: UseCase
+): Recommendation | null {
+  const cursorConfig = configs.find((c) => c.toolName === 'Cursor');
+  const copilotConfig = configs.find((c) => c.toolName === 'GitHub Copilot');
+  if (!cursorConfig || !copilotConfig || cursorConfig.monthlySpend <= 0 || copilotConfig.monthlySpend <= 0) {
+    return null;
+  }
+
+  const combinedSpend = cursorConfig.monthlySpend + copilotConfig.monthlySpend;
+  if (combinedSpend <= 1000) {
+    return {
+      toolId: copilotConfig.toolId,
+      toolName: 'GitHub Copilot',
+      currentSpend: copilotConfig.monthlySpend,
+      recommendedAction: 'Monitor Copilot and Cursor usage before consolidating',
+      monthlySavings: 0,
+      reason:
+        'Total spend on Cursor + Copilot is under $1,000/mo. Verify usage patterns first — ID-based features and workflows may justify both tools.',
+    };
+  }
+
+  const switchingCost = teamSize * 150;
+  const monthlySavings = Math.round(copilotConfig.monthlySpend * 0.4);
+  const paybackMonths = monthlySavings > 0 ? +(switchingCost / monthlySavings).toFixed(1) : Infinity;
+  const sixMonthSavings = monthlySavings * 6;
+
+  if (sixMonthSavings < switchingCost) {
+    return {
+      toolId: copilotConfig.toolId,
+      toolName: 'GitHub Copilot',
+      currentSpend: copilotConfig.monthlySpend,
+      recommendedAction: 'Do not consolidate Copilot with Cursor yet',
+      monthlySavings: 0,
+      reason:
+        'Switching cost exceeds six months of estimated savings. Copilot provides enterprise audit logs, IDE integrations, and security controls that may justify keeping both tools.',
+    };
+  }
+
+  if (paybackMonths < 3) {
+    return {
+      toolId: copilotConfig.toolId,
+      toolName: 'GitHub Copilot',
+      currentSpend: copilotConfig.monthlySpend,
+      recommendedAction: 'Consolidate Copilot functions into Cursor where possible',
+      monthlySavings,
+      paybackMonths,
+      reason:
+        'Assume ~40% of Copilot spend is redundant when both tools are deployed. Include switching risk, retraining, and feature gap review. This consolidation pays back in less than 3 months.',
+    };
+  }
+
+  return {
+    toolId: copilotConfig.toolId,
+    toolName: 'GitHub Copilot',
+    currentSpend: copilotConfig.monthlySpend,
+    recommendedAction: 'Hold consolidation until usage proof supports it',
+    monthlySavings: 0,
+    reason:
+      `Estimated payback is ${paybackMonths} months. Confirm whether Copilot is used for IDE-native workflow, audit logs, and enterprise controls before reducing spend.`,
+  };
+}
+
+/**
+ * Claude + ChatGPT redundancy check with spend-based guidance and audit recommendation.
+ */
+function assessClaudeChatGptOverlap(configs: ToolConfig[]): Recommendation | null {
+  const claudeConfig = configs.find((c) => c.toolName === 'Claude');
+  const chatGptConfig = configs.find((c) => c.toolName === 'ChatGPT');
+  if (!claudeConfig || !chatGptConfig || chatGptConfig.monthlySpend <= 0) {
+    return null;
+  }
+
+  const claudeSpend = claudeConfig.monthlySpend;
+  const chatGptSpend = chatGptConfig.monthlySpend;
+  const spendDiff = Math.abs(claudeSpend - chatGptSpend);
+  const relativeDiff = spendDiff / Math.max(claudeSpend, chatGptSpend, 1);
+
+  if (claudeSpend > chatGptSpend) {
+    return {
+      toolId: chatGptConfig.toolId,
+      toolName: 'ChatGPT',
+      currentSpend: chatGptConfig.monthlySpend,
+      recommendedAction: 'Consolidate ChatGPT usage into Claude where possible',
+      monthlySavings: chatGptSpend,
+      reason:
+        'Claude spend is higher than ChatGPT spend, suggesting Claude is the preferred chat platform. Consolidating ChatGPT can save the full ChatGPT cost, but verify whether real-time web search or browser-based information is required.',
+    };
+  }
+
+  if (chatGptSpend > claudeSpend) {
+    const potentialSavings = claudeConfig.plan !== 'Free' ? claudeSpend : 0;
+    return {
+      toolId: claudeConfig.toolId,
+      toolName: 'Claude',
+      currentSpend: claudeConfig.monthlySpend,
+      recommendedAction: 'Keep ChatGPT for live search and downgrade Claude if usage is limited',
+      monthlySavings: potentialSavings,
+      reason:
+        'ChatGPT appears to be the primary conversational tool. Downgrading Claude to Free can save the paid Claude cost, but preserve Claude for long-form analysis or compliance-heavy workflows if needed.',
+    };
+  }
+
+  if (relativeDiff < 0.15) {
+    return {
+      toolId: claudeConfig.toolId,
+      toolName: 'Claude',
+      currentSpend: claudeConfig.monthlySpend + chatGptConfig.monthlySpend,
+      recommendedAction: 'Run a 30-day usage audit before consolidating cross-platform chat tools',
+      monthlySavings: 0,
+      reason:
+        'Claude and ChatGPT spend are similar. This is a tie-breaker case that requires usage data and capability mapping before recommending consolidation.',
+    };
+  }
+
+  return null;
+}
+
+/**
  * CROSS-TOOL REDUNDANCY CHECK
  * If tools include both 'Cursor' and 'GitHub Copilot' or both 'Claude' and 'ChatGPT',
  * identify overlap in core productivity tooling.
  */
 function checkCrossToolRedundancy(
   configs: ToolConfig[],
-  primaryUseCase: UseCase
+  primaryUseCase: UseCase,
+  teamSize: number
 ): Recommendation | null {
-  const hasCursor = configs.some((c) => c.toolName === 'Cursor');
-  const copilotConfig = configs.find((c) => c.toolName === 'GitHub Copilot');
-  const claudeConfig = configs.find((c) => c.toolName === 'Claude');
-  const chatGptConfig = configs.find((c) => c.toolName === 'ChatGPT');
-
-  if (hasCursor && copilotConfig && copilotConfig.monthlySpend > 0) {
-    const suggestedSavings = Math.round(copilotConfig.monthlySpend * 0.75);
-    return {
-      toolId: copilotConfig.toolId,
-      toolName: 'GitHub Copilot',
-      currentSpend: copilotConfig.monthlySpend,
-      recommendedAction: `Reduce Copilot spend or consolidate with Cursor`,
-      monthlySavings: suggestedSavings,
-      reason:
-        primaryUseCase === 'coding'
-          ? 'Development teams can often consolidate coding assistance into one primary tool and avoid overlapping seat costs.'
-          : 'Multiple code completion assistants can create redundant spend for a single team workflow.',
-    };
+  const cursorCopilot = assessCursorCopilotOverlap(configs, teamSize, primaryUseCase);
+  if (cursorCopilot) {
+    return cursorCopilot;
   }
 
-  if (claudeConfig && chatGptConfig && primaryUseCase === 'research' && chatGptConfig.monthlySpend > 0) {
-    const suggestedSavings = Math.round(chatGptConfig.monthlySpend * 0.5);
-    return {
-      toolId: chatGptConfig.toolId,
-      toolName: 'ChatGPT',
-      currentSpend: chatGptConfig.monthlySpend,
-      recommendedAction: `Consolidate research workflows on one conversational AI`,
-      monthlySavings: suggestedSavings,
-      reason: 'Research teams frequently duplicate AI chat costs across both Claude and ChatGPT.',
-    };
+  const claudeChatGpt = assessClaudeChatGptOverlap(configs);
+  if (claudeChatGpt) {
+    return claudeChatGpt;
   }
 
   return null;
@@ -229,17 +382,85 @@ function checkTokenOptimization(config: ToolConfig): Recommendation | null {
     config.plan === 'APIdirect' && ['Claude', 'ChatGPT', 'Gemini'].includes(config.toolName);
 
   if (isAPITool && config.monthlySpend > 200) {
-    const potentialSavings = config.monthlySpend * 0.9; // 90% potential discount
+    const repeatablePortion = 0.25;
+    const cacheEligibleSpend = config.monthlySpend * repeatablePortion;
+    const realisticSavings = Math.round(cacheEligibleSpend * 0.85); // 85% on repeated prompts
+    const implementationCost = 1200;
+    const paybackMonths = realisticSavings > 0 ? +(implementationCost / realisticSavings).toFixed(1) : Infinity;
+
+    if (realisticSavings <= 40) {
+      return {
+        toolId: config.toolId,
+        toolName: config.toolName,
+        currentSpend: config.monthlySpend,
+        recommendedAction: `Do not prioritize prompt caching yet`,
+        monthlySavings: 0,
+        reason:
+          'Estimated prompt caching savings are too small relative to implementation effort. Only repetitive queries (top 10%) realize material discounts.',
+      };
+    }
+
     return {
       toolId: config.toolId,
       toolName: config.toolName,
       currentSpend: config.monthlySpend,
-      recommendedAction: `Implement Prompt Caching & context window optimization`,
-      monthlySavings: potentialSavings,
-      reason: 'Unmanaged context windows or missing Prompt Caching (90% potential discount on base prompts).',
+      recommendedAction: `Implement prompt caching for repeat API queries`,
+      monthlySavings: realisticSavings,
+      paybackMonths,
+      reason:
+        `Assume ~25% of spend is repeatable and up to 85% of that can be cached. Estimated savings: $${realisticSavings}/mo. Setup cost is ~$${implementationCost}, payback in ${paybackMonths} months. Verify your usage pattern before proceeding.`,
     };
   }
   return null;
+}
+
+function calculateWasteScore(tools: ToolConfig[]): { score: number; category: string; breakdown: string } {
+  if (tools.length === 0) {
+    return { score: 0, category: 'Optimized', breakdown: 'No tools provided.' };
+  }
+
+  const overspendRatios: number[] = [];
+  let overlapCount = 0;
+  let unusedPlans = 0;
+
+  for (const tool of tools) {
+    const expected = estimateExpectedSpend(tool);
+    if (expected !== null && expected > 0 && tool.monthlySpend > expected) {
+      overspendRatios.push((tool.monthlySpend - expected) / tool.monthlySpend);
+    }
+    if (tool.monthlySpend === 0) {
+      unusedPlans += 1;
+    }
+  }
+
+  const categoryPairs: Record<string, string[]> = {
+    Cursor: ['coding'],
+    'GitHub Copilot': ['coding'],
+    Claude: ['chat', 'writing', 'research'],
+    ChatGPT: ['chat', 'writing', 'research'],
+    Gemini: ['chat', 'research'],
+  };
+
+  for (let i = 0; i < tools.length; i += 1) {
+    for (let j = i + 1; j < tools.length; j += 1) {
+      const a = tools[i];
+      const b = tools[j];
+      const categoriesA = categoryPairs[a.toolName] ?? [];
+      const categoriesB = categoryPairs[b.toolName] ?? [];
+      if (categoriesA.some((c) => categoriesB.includes(c))) {
+        overlapCount += 1;
+      }
+    }
+  }
+
+  const overspendPct = overspendRatios.length > 0 ? overspendRatios.reduce((a, b) => a + b, 0) / overspendRatios.length : 0;
+  const redundancyRatio = Math.min(1, overlapCount / Math.max(1, tools.length - 1));
+  const unusedPct = unusedPlans / tools.length;
+  const score = Math.min(1, overspendPct * 0.3 + redundancyRatio * 0.4 + unusedPct * 0.3);
+  const category = score > 0.6 ? 'High Waste' : score >= 0.3 ? 'Moderate Waste' : 'Optimized';
+  const breakdown = `waste score = (${(overspendPct * 100).toFixed(0)}% overspend * 0.3) + (${(redundancyRatio * 100).toFixed(0)}% redundancy * 0.4) + (${(unusedPct * 100).toFixed(0)}% unused * 0.3) = ${(score * 100).toFixed(0)}%`;
+
+  return { score, category, breakdown };
 }
 
 // =========================================================================
@@ -651,51 +872,51 @@ function evaluateRetailVsCredits(tools: ToolConfig[]): PricingFitAnswer {
       continue;
     }
 
-    // Claude Pro/Max/Team with high spend → could use Anthropic API with prompt caching
+    // Claude Pro/Max/Team with high spend → could use Claude Haiku API or Anthropic API with prompt caching
     if (t.toolName === 'Claude' && ['Pro', 'Max', 'Team', 'Enterprise'].includes(t.plan)) {
       if (t.monthlySpend >= 100) {
-        const estimatedAPICost = Math.round(t.monthlySpend * 0.35); // ~65% savings with caching
+        const estimatedHaikuCost = Math.round(t.monthlySpend * 0.30);
         details.push({
           toolName: t.toolName,
           currentPlan: t.plan,
           currentCost: t.monthlySpend,
-          suggestedPlan: 'Anthropic API + Prompt Caching',
-          suggestedCost: estimatedAPICost,
-          savingsAmount: t.monthlySpend - estimatedAPICost,
-          explanation: `At $${t.monthlySpend}/mo on ${t.plan}, routing heavy or repeatable workloads through the Anthropic API with prompt caching (up to 90% discount on cached prompts) could reduce costs to ~$${estimatedAPICost}/mo.`,
+          suggestedPlan: 'Claude Haiku API + prompt caching',
+          suggestedCost: estimatedHaikuCost,
+          savingsAmount: t.monthlySpend - estimatedHaikuCost,
+          explanation: `At $${t.monthlySpend}/mo on ${t.plan}, routing repeatable workloads through Claude Haiku API ($0.80/$4 per 1M tokens) can often cut effective costs significantly for low-complexity use cases.`,
         });
-        findings.push(`${t.toolName} ${t.plan}: ~$${t.monthlySpend - estimatedAPICost}/mo savings via API credits`);
+        findings.push(`${t.toolName} ${t.plan}: ~$${t.monthlySpend - estimatedHaikuCost}/mo savings via Claude Haiku API`);
       } else {
         details.push({
           toolName: t.toolName,
           currentPlan: t.plan,
           currentCost: t.monthlySpend,
-          explanation: `At $${t.monthlySpend}/mo, the convenience of the ${t.plan} seat plan likely outweighs API integration overhead.`,
+          explanation: `At $${t.monthlySpend}/mo, seat plan convenience may outweigh API integration overhead unless you have highly repeatable queries.`,
         });
       }
       continue;
     }
 
-    // ChatGPT Plus/Team with significant spend → could route via OpenAI API
+    // ChatGPT Plus/Team with significant spend → could route via OpenAI API o1-preview
     if (t.toolName === 'ChatGPT' && ['Plus', 'Team', 'Enterprise'].includes(t.plan)) {
       if (t.monthlySpend >= 80) {
-        const estimatedAPICost = Math.round(t.monthlySpend * 0.4); // ~60% savings at token rates
+        const estimatedAPICost = Math.round(t.monthlySpend * 0.35);
         details.push({
           toolName: t.toolName,
           currentPlan: t.plan,
           currentCost: t.monthlySpend,
-          suggestedPlan: 'OpenAI API (token-based)',
+          suggestedPlan: 'OpenAI o1-preview API',
           suggestedCost: estimatedAPICost,
           savingsAmount: t.monthlySpend - estimatedAPICost,
-          explanation: `With $${t.monthlySpend}/mo on ${t.plan}, heavy usage patterns may be cheaper via the OpenAI API at per-token rates (~$${estimatedAPICost}/mo estimated).`,
+          explanation: `With $${t.monthlySpend}/mo on ${t.plan}, token-based OpenAI o1-preview ($15/M input, $60/M output) may be cheaper for developer-facing workloads than seat-based retail pricing.`,
         });
-        findings.push(`${t.toolName} ${t.plan}: ~$${t.monthlySpend - estimatedAPICost}/mo savings via API`);
+        findings.push(`${t.toolName} ${t.plan}: ~$${t.monthlySpend - estimatedAPICost}/mo savings via OpenAI o1-preview`);
       } else {
         details.push({
           toolName: t.toolName,
           currentPlan: t.plan,
           currentCost: t.monthlySpend,
-          explanation: `At $${t.monthlySpend}/mo, ${t.plan}'s convenience and included features justify retail pricing.`,
+          explanation: `At $${t.monthlySpend}/mo, ${t.plan} provides non-API convenience that often outweighs the integration cost.`,
         });
       }
       continue;
@@ -759,8 +980,9 @@ function evaluateRetailVsCredits(tools: ToolConfig[]): PricingFitAnswer {
  */
 export function optimizeToolStack(
   tools: ToolConfig[],
-  _teamSize: number = 1,
-  primaryUseCase: UseCase = 'mixed'
+  teamSize: number = 1,
+  primaryUseCase: UseCase = 'mixed',
+  isRegulatedIndustry: boolean = false
 ): OptimizationResult {
   const recommendations: Recommendation[] = [];
   const seenToolIds = new Set<string>();
@@ -770,7 +992,7 @@ export function optimizeToolStack(
 
   // Check individual tool rules
   tools.forEach((config) => {
-    const claudeTeam = checkClaudeTeamFloor(config);
+    const claudeTeam = checkClaudeTeamFloor(config, isRegulatedIndustry);
     if (claudeTeam) {
       recommendations.push(claudeTeam);
       seenToolIds.add(config.toolId);
@@ -796,7 +1018,7 @@ export function optimizeToolStack(
   });
 
   // Check cross-tool redundancy
-  const crossRedundancy = checkCrossToolRedundancy(tools, primaryUseCase);
+  const crossRedundancy = checkCrossToolRedundancy(tools, primaryUseCase, teamSize);
   if (crossRedundancy) {
     recommendations.push(crossRedundancy);
     seenToolIds.add(crossRedundancy.toolId);
@@ -830,6 +1052,7 @@ export function optimizeToolStack(
   const totalMonthlySavings = recommendations.reduce((sum, rec) => sum + rec.monthlySavings, 0);
   const totalAnnualSavings = totalMonthlySavings * 12;
   const isFullyOptimized = recommendations.length === 0;
+  const waste = calculateWasteScore(tools);
 
   return {
     recommendations,
@@ -838,6 +1061,9 @@ export function optimizeToolStack(
     totalAnnualSavings,
     currentMonthlySpend,
     currentAnnualSpend,
+    wasteScore: waste.score,
+    wasteCategory: waste.category,
+    wasteBreakdown: waste.breakdown,
     isFullyOptimized,
   };
 }

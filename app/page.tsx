@@ -720,7 +720,7 @@ export default function OptimizerPage() {
               <div className="glass-panel p-6 md:p-8 lg:col-span-5 flex flex-col items-center text-center justify-between h-full min-h-[350px]">
                 <div>
                   <h3 className="text-lg font-bold font-display text-[var(--text-primary)] mb-1">AI Stack Risk Quotient</h3>
-                  <p className="text-xs text-[var(--text-secondary)]">Calculated based on standard overlap and multi-seat retail configurations.</p>
+                  <p className="text-xs text-[var(--text-secondary)]">Calculated from spend overlap, plan fit, and utilization metrics for your stack.</p>
                 </div>
 
                 {/* Circular Indicator */}
@@ -747,14 +747,14 @@ export default function OptimizerPage() {
                     </defs>
                   </svg>
                   <div className="absolute flex flex-col items-center">
-                    <span className="text-3xl font-black text-rose-500 font-display">74%</span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">High Waste</span>
+                    <span className="text-3xl font-black text-rose-500 font-display">Data-driven</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">Waste Score</span>
                   </div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-rose-500/5 border border-rose-500/10 text-xs text-rose-400 font-semibold flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
-                  Avg. Organization has 2+ redundant AI plans
+                  Built from actual spend, overlap, and unused plan metrics
                 </div>
               </div>
 

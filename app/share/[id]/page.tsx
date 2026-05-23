@@ -8,6 +8,7 @@ import {
   RecommendationCard,
   OptimizedStateMessage,
 } from '@/components/form-and-results';
+import { ShareUrlButton } from '@/components/share-url-button';
 import styles from '@/components/credex.module.css';
 
 /**
@@ -82,6 +83,7 @@ export default async function SharedResultPage({ params }: SharePageProps) {
       </header>
 
       <div id="results-section" style={{ maxWidth: '900px', margin: '0 auto' }}>
+        <ShareUrlButton />
         <ResultsHeroBanner
           monthlySavings={optimizationResult.totalMonthlySavings}
           annualSavings={optimizationResult.totalAnnualSavings}
