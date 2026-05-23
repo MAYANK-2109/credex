@@ -443,6 +443,218 @@
   color: white;
 }
 
+/* ============================================================================
+   PRICING FIT CARD
+   ============================================================================ */
+
+.pricingFitCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.pricingFitCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  border-radius: 4px 0 0 4px;
+  transition: background 0.3s ease;
+}
+
+.pricingFitCardYes::before {
+  background: linear-gradient(180deg, var(--accent-neon, #00f0ff), var(--success-green, #10b981));
+}
+
+.pricingFitCardNo::before {
+  background: linear-gradient(180deg, var(--accent-pink, #ff6b8a), #ff3d57);
+}
+
+.pricingFitCardUnknown::before {
+  background: linear-gradient(180deg, #6b7280, #9ca3af);
+}
+
+.pricingFitCard:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.pricingFitHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  gap: 1rem;
+  user-select: none;
+}
+
+.pricingFitQuestion {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary, #fff);
+  flex: 1;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.statusYes {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success-green, #10b981);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.statusNo {
+  background: rgba(255, 107, 138, 0.15);
+  color: var(--accent-pink, #ff6b8a);
+  border: 1px solid rgba(255, 107, 138, 0.3);
+}
+
+.statusUnknown {
+  background: rgba(156, 163, 175, 0.15);
+  color: #9ca3af;
+  border: 1px solid rgba(156, 163, 175, 0.3);
+}
+
+.pricingFitEvidence {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-secondary, #a1a1aa);
+}
+
+.pricingFitRecommendation {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  border-left: 3px solid var(--accent-neon, #00f0ff);
+}
+
+.pricingFitDetailsWrapper {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin 0.3s ease;
+  margin-top: 0;
+}
+
+.pricingFitDetailsWrapperOpen {
+  max-height: 2000px;
+  opacity: 1;
+  margin-top: 1rem;
+}
+
+.expandToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary, #a1a1aa);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.expandToggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary, #fff);
+}
+
+.expandToggleIcon {
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.expandToggleIconOpen {
+  transform: rotate(180deg);
+}
+
+.detailsTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.85rem;
+}
+
+.detailsTable thead th {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  color: var(--text-secondary, #a1a1aa);
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.detailsTable tbody td {
+  padding: 0.6rem 0.75rem;
+  color: var(--text-primary, #fff);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: top;
+}
+
+.detailsTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.detailsTable tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.savingsChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success-green, #10b981);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  white-space: nowrap;
+}
+
+.detailExplanation {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #a1a1aa);
+  max-width: 320px;
+  line-height: 1.4;
+}
+
+.arrowIcon {
+  color: var(--text-secondary, #a1a1aa);
+  font-size: 0.85rem;
+}
+
 /* Responsive adjustments */
 @media (max-width: 1024px) {
   .container {
@@ -495,6 +707,23 @@
 
   .summaryBox {
     padding: 1.5rem;
+  }
+
+  .detailsTable {
+    font-size: 0.8rem;
+  }
+
+  .detailsTable thead th,
+  .detailsTable tbody td {
+    padding: 0.5rem;
+  }
+
+  .detailExplanation {
+    max-width: 240px;
+  }
+
+  .pricingFitQuestion {
+    font-size: 1rem;
   }
 }
 
@@ -564,5 +793,36 @@
     width: 100%;
     max-width: 100%;
     padding: 1.5rem;
+  }
+
+  .pricingFitCard {
+    padding: 1rem;
+  }
+
+  .pricingFitHeader {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .pricingFitQuestion {
+    font-size: 0.95rem;
+  }
+
+  .detailsTable {
+    font-size: 0.75rem;
+  }
+
+  .detailsTable thead th {
+    font-size: 0.65rem;
+  }
+
+  .detailExplanation {
+    max-width: 180px;
+    font-size: 0.7rem;
+  }
+
+  .pricingFitRecommendation {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.75rem;
   }
 }

@@ -260,6 +260,192 @@ export function OptimizedStateMessage({ savings }: { savings: number }) {
 }
 
 /* ============================================================================
+   PRICING FIT CARD — Expandable question card with per-tool details
+   ============================================================================ */
+
+import type { PricingFitAnswer } from '@/lib/optimization-engine';
+
+interface PricingFitCardProps {
+  answer: PricingFitAnswer;
+}
+
+const QUESTION_LABELS: Record<PricingFitAnswer['question'], string> = {
+  'Right plan for usage': 'Are you on the right plan for your usage?',
+  'Cheaper plan from same vendor': 'Is there a cheaper plan from the same vendor?',
+  'Substantially cheaper alternative': 'Is there a substantially cheaper alternative tool?',
+  'Paying retail vs credits': 'Are you paying retail when you could use credits?',
+};
+
+const STATUS_ICONS: Record<PricingFitAnswer['status'], string> = {
+  Yes: '✅',
+  No: '❌',
+  Unknown: '❓',
+};
+
+const STATUS_LABELS: Record<string, Record<PricingFitAnswer['question'], string>> = {
+  Yes: {
+    'Right plan for usage': 'Properly Sized',
+    'Cheaper plan from same vendor': 'Already Cheapest',
+    'Substantially cheaper alternative': 'Cheaper Option Available',
+    'Paying retail vs credits': 'No Savings Available',
+  },
+  No: {
+    'Right plan for usage': 'Over-Sized Plans Detected',
+    'Cheaper plan from same vendor': 'Cheaper Tiers Available',
+    'Substantially cheaper alternative': 'No Cheaper Alternatives',
+    'Paying retail vs credits': 'Retail Pricing Is Fine',
+  },
+  Unknown: {
+    'Right plan for usage': 'Insufficient Data',
+    'Cheaper plan from same vendor': 'Insufficient Data',
+    'Substantially cheaper alternative': 'Insufficient Data',
+    'Paying retail vs credits': 'Insufficient Data',
+  },
+};
+
+export function PricingFitCard({ answer }: PricingFitCardProps) {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+
+  const statusClass =
+    answer.status === 'Yes'
+      ? styles.pricingFitCardYes
+      : answer.status === 'No'
+        ? styles.pricingFitCardNo
+        : styles.pricingFitCardUnknown;
+
+  const badgeClass =
+    answer.status === 'Yes'
+      ? styles.statusYes
+      : answer.status === 'No'
+        ? styles.statusNo
+        : styles.statusUnknown;
+
+  // Determine if the status is "good" or "bad" depending on the question
+  // For Q1, Q2: "Yes" = good, "No" = bad
+  // For Q3: "Yes" = there IS a cheaper alternative (bad for current choice, good for savings)
+  // For Q4: "Yes" = you ARE paying retail when you could use credits (bad)
+  const isActionable =
+    (answer.question === 'Right plan for usage' && answer.status === 'No') ||
+    (answer.question === 'Cheaper plan from same vendor' && answer.status === 'No') ||
+    (answer.question === 'Substantially cheaper alternative' && answer.status === 'Yes') ||
+    (answer.question === 'Paying retail vs credits' && answer.status === 'Yes');
+
+  const hasDetails = answer.details && answer.details.length > 0;
+  const hasSavingsDetails = answer.details?.some((d) => d.savingsAmount && d.savingsAmount > 0);
+
+  const statusLabel = STATUS_LABELS[answer.status]?.[answer.question] ?? answer.status;
+
+  return (
+    <div className={`${styles.pricingFitCard} ${statusClass}`}>
+      <div
+        className={styles.pricingFitHeader}
+        onClick={() => hasDetails && setIsExpanded(!isExpanded)}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isExpanded}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            hasDetails && setIsExpanded(!isExpanded);
+          }
+        }}
+      >
+        <h4 className={styles.pricingFitQuestion}>
+          {QUESTION_LABELS[answer.question] ?? answer.question}
+        </h4>
+        <span className={`${styles.statusBadge} ${badgeClass}`}>
+          {STATUS_ICONS[answer.status]} {statusLabel}
+        </span>
+        {hasDetails && (
+          <button
+            className={styles.expandToggle}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}
+            aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
+          >
+            {isExpanded ? 'Hide' : 'Details'}
+            <ChevronDown
+              size={12}
+              className={`${styles.expandToggleIcon} ${isExpanded ? styles.expandToggleIconOpen : ''}`}
+            />
+          </button>
+        )}
+      </div>
+
+      {/* Evidence summary — always visible */}
+      <p className={styles.pricingFitEvidence}>{answer.evidence}</p>
+
+      {/* Recommendation callout — always visible if actionable */}
+      {isActionable && (
+        <div className={styles.pricingFitRecommendation}>
+          💡 {answer.recommendation}
+        </div>
+      )}
+
+      {/* Expandable per-tool details */}
+      {hasDetails && (
+        <div
+          className={`${styles.pricingFitDetailsWrapper} ${isExpanded ? styles.pricingFitDetailsWrapperOpen : ''}`}
+        >
+          <table className={styles.detailsTable}>
+            <thead>
+              <tr>
+                <th>Tool</th>
+                <th>Current</th>
+                {hasSavingsDetails && <th>Suggested</th>}
+                {hasSavingsDetails && <th>Savings</th>}
+                <th>Analysis</th>
+              </tr>
+            </thead>
+            <tbody>
+              {answer.details.map((detail, idx) => (
+                <tr key={`${detail.toolName}-${idx}`}>
+                  <td style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{detail.toolName}</td>
+                  <td>
+                    <div>{detail.currentPlan}</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
+                      ${detail.currentCost.toLocaleString()}/mo
+                    </div>
+                  </td>
+                  {hasSavingsDetails && (
+                    <td>
+                      {detail.suggestedPlan ? (
+                        <>
+                          <div>{detail.suggestedPlan}</div>
+                          <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
+                            ${detail.suggestedCost?.toLocaleString()}/mo
+                          </div>
+                        </>
+                      ) : (
+                        <span className={styles.arrowIcon}>—</span>
+                      )}
+                    </td>
+                  )}
+                  {hasSavingsDetails && (
+                    <td>
+                      {detail.savingsAmount && detail.savingsAmount > 0 ? (
+                        <span className={styles.savingsChip}>
+                          ↓ ${detail.savingsAmount.toLocaleString()}/mo
+                        </span>
+                      ) : (
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>—</span>
+                      )}
+                    </td>
+                  )}
+                  <td className={styles.detailExplanation}>{detail.explanation}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================================
    CTA COMPONENTS
    ============================================================================ */
 

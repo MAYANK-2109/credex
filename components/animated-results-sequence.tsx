@@ -6,7 +6,7 @@ import {
   RecommendationCard,
   OptimizedStateMessage,
   SavingsCTA,
-
+  PricingFitCard,
 } from './form-and-results';
 import React from 'react';
 
@@ -28,6 +28,7 @@ export function AnimatedResultsSequence({
   return (
     <div style={{ padding: '2.5rem 1rem' }}>
       <div style={{ width: '100%', maxWidth: '1000px', margin: '0 auto' }}>
+        {/* 1. SAVINGS HERO BANNER */}
         <div style={{ marginBottom: '2rem' }}>
           <ResultsHeroBanner
             monthlySavings={optimizationResult.totalMonthlySavings}
@@ -35,58 +36,25 @@ export function AnimatedResultsSequence({
           />
         </div>
 
+        {/* 2. PRICING FIT QUESTION CARDS */}
         <div style={{ width: '100%', marginBottom: '2rem' }}>
           <div className="glass-panel" style={{ padding: '2rem' }}>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.75rem' }}>
-              Pricing Plan Fit & Alternatives
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+              Pricing Plan Fit &amp; Alternatives
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-              {optimizationResult.pricingFitAnswers?.map((a) => (
-                <div
-                  key={a.question}
-                  style={{
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '14px',
-                    padding: '1rem',
-                    background: 'rgba(0,0,0,0.15)',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'baseline',
-                      justifyContent: 'space-between',
-                      gap: '1rem',
-                    }}
-                  >
-                    <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>{a.question}</h4>
-                    <span
-                      style={{
-                        fontSize: '0.875rem',
-                        fontWeight: 800,
-                        color:
-                          a.status === 'Yes'
-                            ? 'var(--accent-neon)'
-                            : a.status === 'No'
-                              ? 'var(--accent-pink)'
-                              : 'var(--text-secondary)',
-                      }}
-                    >
-                      {a.status}
-                    </span>
-                  </div>
-                  <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                    <strong style={{ color: 'var(--text-primary)' }}>Evidence:</strong> {a.evidence}
-                  </p>
-                  <p style={{ margin: '0.5rem 0 0', fontWeight: 700 }}>
-                    Recommendation: <span style={{ fontWeight: 600 }}>{a.recommendation}</span>
-                  </p>
-                </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+              We analyzed your tool stack against four key questions to find savings opportunities.
+              Click &quot;Details&quot; on any card to see the per-tool breakdown.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {optimizationResult.pricingFitAnswers?.map((answer) => (
+                <PricingFitCard key={answer.question} answer={answer} />
               ))}
             </div>
           </div>
         </div>
 
+        {/* 3. AI STACK ANALYSIS SUMMARY */}
         <div style={{ width: '100%', marginBottom: '2rem' }}>
           <div className="glass-panel" style={{ padding: '2rem' }}>
             <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>
@@ -100,6 +68,7 @@ export function AnimatedResultsSequence({
           </div>
         </div>
 
+        {/* 4. ACTIONABLE INSIGHTS / RECOMMENDATIONS */}
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem' }}>
             Actionable Insights
@@ -118,6 +87,7 @@ export function AnimatedResultsSequence({
           )}
         </div>
 
+        {/* 5. CTA */}
         <div style={{ width: '100%', marginTop: '2rem' }}>
           <SavingsCTA
             savings={savings}

@@ -403,5 +403,14 @@
     "primaryUseCase": "coding",
     "toolCount": 2,
     "timestamp": "2026-05-22T20:00:05.737Z"
+  },
+  {
+    "email": "test@example.com",
+    "companyName": "Acme",
+    "role": "Product",
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 2,
+    "timestamp": "2026-05-23T06:14:54.326Z"
   }
 ]

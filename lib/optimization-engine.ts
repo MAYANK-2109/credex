@@ -27,6 +27,16 @@ export interface Recommendation {
   reason: string;
 }
 
+export type PricingFitDetail = {
+  toolName: string;
+  currentPlan: string;
+  currentCost: number;
+  suggestedPlan?: string;
+  suggestedCost?: number;
+  savingsAmount?: number;
+  explanation: string;
+};
+
 export type PricingFitAnswer = {
   question:
     | 'Right plan for usage'
@@ -36,6 +46,7 @@ export type PricingFitAnswer = {
   status: 'Yes' | 'No' | 'Unknown';
   evidence: string;
   recommendation: string;
+  details: PricingFitDetail[];
 };
 
 export interface OptimizationResult {
@@ -82,6 +93,20 @@ const TOOL_PLAN_PRICING: Record<
     Ultra: { seatPrice: 45 },
     API: {},
   },
+};
+
+/**
+ * Capability categories for cross-tool alternative comparison.
+ * Each tool belongs to one or more categories.
+ */
+const TOOL_CATEGORIES: Record<string, string[]> = {
+  Cursor: ['coding'],
+  'GitHub Copilot': ['coding'],
+  Claude: ['chat', 'writing', 'research'],
+  ChatGPT: ['chat', 'writing', 'research'],
+  Gemini: ['chat', 'research'],
+  'Anthropic API': ['api'],
+  'OpenAI API': ['api'],
 };
 
 function estimateExpectedSpend(config: ToolConfig): number | null {
@@ -217,6 +242,517 @@ function checkTokenOptimization(config: ToolConfig): Recommendation | null {
   return null;
 }
 
+// =========================================================================
+// PRICING FIT QUESTION ENGINES
+// =========================================================================
+
+/**
+ * Q1 — "Right plan for usage?"
+ * Detect overkill: plans that are oversized for the user's actual seat count / usage.
+ */
+function evaluateRightPlanForUsage(tools: ToolConfig[]): PricingFitAnswer {
+  const details: PricingFitDetail[] = [];
+  const issues: string[] = [];
+
+  for (const t of tools) {
+    const expected = estimateExpectedSpend(t);
+
+    // Claude Team with < 5 seats → overkill (5-seat billing floor)
+    if (t.toolName === 'Claude' && t.plan === 'Team' && t.seats < 5) {
+      const proCost = t.seats * 20;
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        suggestedPlan: 'Pro',
+        suggestedCost: proCost,
+        savingsAmount: t.monthlySpend - proCost,
+        explanation: `Team plan bills a minimum of 5 seats ($120/mo) even for ${t.seats} user${t.seats > 1 ? 's' : ''}. Pro at $20/seat is right-sized.`,
+      });
+      issues.push(`Claude Team is overkill for ${t.seats} seat(s)`);
+      continue;
+    }
+
+    // Cursor Business with < 10 seats → overkill
+    if (t.toolName === 'Cursor' && t.plan === 'Business' && t.seats < 10) {
+      const proCost = t.seats * 20;
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        suggestedPlan: 'Pro',
+        suggestedCost: proCost,
+        savingsAmount: t.monthlySpend - proCost,
+        explanation: `Business plan economics start at 10+ seats. With ${t.seats} seat(s), Pro ($20/seat) is more cost-effective.`,
+      });
+      issues.push(`Cursor Business is overkill for ${t.seats} seat(s)`);
+      continue;
+    }
+
+    // Cursor Enterprise with < 25 seats → overkill
+    if (t.toolName === 'Cursor' && t.plan === 'Enterprise' && t.seats < 25) {
+      const proCost = t.seats * 20;
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        suggestedPlan: 'Pro',
+        suggestedCost: proCost,
+        savingsAmount: t.monthlySpend - proCost,
+        explanation: `Enterprise plan requires 25+ seats. With ${t.seats} seat(s), Pro ($20/seat) avoids overpaying.`,
+      });
+      issues.push(`Cursor Enterprise is overkill for ${t.seats} seat(s)`);
+      continue;
+    }
+
+    // ChatGPT Team with 1 seat → overkill (Plus is $20 flat)
+    if (t.toolName === 'ChatGPT' && t.plan === 'Team' && t.seats <= 1) {
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        suggestedPlan: 'Plus',
+        suggestedCost: 20,
+        savingsAmount: t.monthlySpend - 20,
+        explanation: `Team plan is designed for collaborative use. A solo user gets the same models with Plus at $20/mo.`,
+      });
+      issues.push(`ChatGPT Team is overkill for a single user`);
+      continue;
+    }
+
+    // ChatGPT Enterprise with ≤ 5 seats → overkill
+    if (t.toolName === 'ChatGPT' && t.plan === 'Enterprise' && t.seats <= 5) {
+      const teamCost = t.seats * 20;
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        suggestedPlan: 'Team',
+        suggestedCost: teamCost,
+        savingsAmount: t.monthlySpend - teamCost,
+        explanation: `Enterprise plan ($30/seat) is designed for large orgs. For ${t.seats} seat(s), Team ($20/seat) provides similar capabilities.`,
+      });
+      issues.push(`ChatGPT Enterprise is overkill for ${t.seats} seat(s)`);
+      continue;
+    }
+
+    // Copilot Enterprise with ≤ 5 seats → overkill
+    if (t.toolName === 'GitHub Copilot' && t.plan === 'Enterprise' && t.seats <= 5) {
+      const businessCost = t.seats * 19;
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        suggestedPlan: 'Business',
+        suggestedCost: businessCost,
+        savingsAmount: t.monthlySpend - businessCost,
+        explanation: `Enterprise ($21/seat) adds fine-tuning and policy controls most small teams don't need. Business ($19/seat) covers core code completion.`,
+      });
+      issues.push(`Copilot Enterprise is overkill for ${t.seats} seat(s)`);
+      continue;
+    }
+
+    // Gemini Ultra when Pro would suffice (low spend relative to seat count)
+    if (t.toolName === 'Gemini' && t.plan === 'Ultra') {
+      const proCost = t.seats * 25;
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        suggestedPlan: 'Pro',
+        suggestedCost: proCost,
+        savingsAmount: t.monthlySpend - proCost,
+        explanation: `Ultra ($45/seat) provides higher rate limits and advanced features. Evaluate whether Pro ($25/seat) meets your actual needs.`,
+      });
+      issues.push(`Gemini Ultra may be overkill — evaluate Pro tier`);
+      continue;
+    }
+
+    // Claude Max with 1 seat for light usage → Pro is cheaper
+    if (t.toolName === 'Claude' && t.plan === 'Max' && t.seats <= 1) {
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        suggestedPlan: 'Pro',
+        suggestedCost: 20,
+        savingsAmount: t.monthlySpend - 20,
+        explanation: `Max ($35/mo) adds higher usage limits. If you're not consistently hitting Pro's limits, Pro ($20/mo) saves $15/mo.`,
+      });
+      issues.push(`Claude Max may be overkill for a single user`);
+      continue;
+    }
+
+    // Claude Enterprise with small team → Team may suffice
+    if (t.toolName === 'Claude' && t.plan === 'Enterprise' && t.seats >= 5 && t.seats <= 15) {
+      const teamCost = t.seats * 24;
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        suggestedPlan: 'Team',
+        suggestedCost: teamCost,
+        savingsAmount: t.monthlySpend - teamCost,
+        explanation: `Enterprise ($35/seat) adds SSO, admin controls and higher limits. For ${t.seats} seats, Team ($24/seat) may cover your needs.`,
+      });
+      issues.push(`Claude Enterprise may be overkill for ${t.seats} seat(s)`);
+      continue;
+    }
+
+    // General overspend detection: paying 50%+ more than expected list price
+    if (expected !== null && expected > 0 && t.monthlySpend > expected * 1.5) {
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        suggestedPlan: t.plan,
+        suggestedCost: expected,
+        savingsAmount: t.monthlySpend - expected,
+        explanation: `You're paying $${t.monthlySpend}/mo but the expected cost for ${t.plan} with ${t.seats} seat(s) is ~$${expected.toFixed(0)}/mo. Verify your billing.`,
+      });
+      issues.push(`${t.toolName} spend is 50%+ above expected list price`);
+      continue;
+    }
+
+    // Plan is well-sized
+    details.push({
+      toolName: t.toolName,
+      currentPlan: t.plan,
+      currentCost: t.monthlySpend,
+      explanation: expected !== null
+        ? `${t.plan} at $${t.monthlySpend}/mo for ${t.seats} seat(s) is well-matched (expected ~$${expected.toFixed(0)}/mo).`
+        : `${t.plan} appears appropriately sized for your usage.`,
+    });
+  }
+
+  const hasIssues = issues.length > 0;
+  return {
+    question: 'Right plan for usage',
+    status: hasIssues ? 'No' : 'Yes',
+    evidence: hasIssues
+      ? `${issues.length} plan(s) are over-sized for your actual usage: ${issues.join('; ')}.`
+      : 'All selected plans are appropriately sized for your team and seat count.',
+    recommendation: hasIssues
+      ? 'Downgrade the flagged plans to save money without losing capabilities you actually use.'
+      : 'No changes needed — your plans are right-sized.',
+    details,
+  };
+}
+
+/**
+ * Q2 — "Cheaper plan from same vendor?"
+ * For each tool, find the cheapest compatible tier from the same vendor.
+ */
+function evaluateCheaperSameVendor(tools: ToolConfig[]): PricingFitAnswer {
+  const details: PricingFitDetail[] = [];
+  const findings: string[] = [];
+
+  for (const t of tools) {
+    const toolPricing = TOOL_PLAN_PRICING[t.toolName];
+    if (!toolPricing) {
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        explanation: 'No pricing data available for this tool — cannot compare tiers.',
+      });
+      continue;
+    }
+
+    const currentExpected = estimateExpectedSpend(t);
+    // Use actual spend if expected is unknown (e.g. APIdirect)
+    const currentCostRef = currentExpected ?? t.monthlySpend;
+
+    // Build list of compatible alternative tiers
+    const candidates: { plan: string; expected: number }[] = [];
+    for (const [planName, p] of Object.entries(toolPricing)) {
+      if (!p) continue;
+      if (p.flatPrice === undefined && p.seatPrice === undefined) continue;
+      // Only tiers that are compatible with this seat count
+      if (p.minSeats !== undefined && t.seats < p.minSeats) continue;
+
+      const expected = p.flatPrice !== undefined ? p.flatPrice : t.seats * (p.seatPrice ?? 0);
+      if (typeof expected === 'number' && isFinite(expected)) {
+        candidates.push({ plan: planName, expected });
+      }
+    }
+
+    if (candidates.length === 0) {
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        explanation: 'API/usage-based pricing — no fixed-tier alternatives to compare.',
+      });
+      continue;
+    }
+
+    const cheapest = candidates.reduce((a, b) => (a.expected < b.expected ? a : b));
+
+    if (cheapest.plan === t.plan || currentCostRef <= cheapest.expected * 1.05) {
+      // Already on cheapest or within 5%
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        explanation: `Already on the most cost-effective tier. ${t.plan} at ~$${currentCostRef.toFixed(0)}/mo is optimal among ${candidates.length} available plan(s).`,
+      });
+    } else {
+      const savings = currentCostRef - cheapest.expected;
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        suggestedPlan: cheapest.plan,
+        suggestedCost: cheapest.expected,
+        savingsAmount: Math.round(savings),
+        explanation: `${t.plan} (~$${currentCostRef.toFixed(0)}/mo) is more expensive than ${cheapest.plan} (~$${cheapest.expected.toFixed(0)}/mo) for ${t.seats} seat(s). Switch to save ~$${savings.toFixed(0)}/mo.`,
+      });
+      findings.push(`${t.toolName}: ${t.plan} → ${cheapest.plan} (save ~$${savings.toFixed(0)}/mo)`);
+    }
+  }
+
+  const hasFindings = findings.length > 0;
+  return {
+    question: 'Cheaper plan from same vendor',
+    status: hasFindings ? 'No' : 'Yes',
+    evidence: hasFindings
+      ? `Cheaper tiers found: ${findings.join('; ')}.`
+      : 'No cheaper same-vendor tiers detected — you are on the most cost-effective plans.',
+    recommendation: hasFindings
+      ? 'Downgrade to the suggested tiers to reduce cost while keeping the same vendor.'
+      : 'Keep your current tiers — they are cost-competitive.',
+    details,
+  };
+}
+
+/**
+ * Q3 — "Substantially cheaper alternative tool?"
+ * Group tools by capability category (coding, chat, api) and find cheaper cross-vendor options.
+ */
+function evaluateCheaperAlternative(tools: ToolConfig[]): PricingFitAnswer {
+  const details: PricingFitDetail[] = [];
+  const findings: string[] = [];
+
+  // For each tool the user selected, find alternatives in the same capability category
+  for (const t of tools) {
+    const toolCategories = TOOL_CATEGORIES[t.toolName];
+    if (!toolCategories || toolCategories.length === 0) {
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        explanation: 'No category mapping available — cannot compare alternatives.',
+      });
+      continue;
+    }
+
+    const currentExpected = estimateExpectedSpend(t);
+    const currentCostRef = currentExpected ?? t.monthlySpend;
+
+    if (currentCostRef <= 0) {
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        explanation: 'No spend detected — enter actual spend to compare alternatives.',
+      });
+      continue;
+    }
+
+    // Find all alternative tools in the same category
+    let cheapestAlt: { toolName: string; plan: string; cost: number } | null = null;
+
+    for (const [altToolName, altPricing] of Object.entries(TOOL_PLAN_PRICING)) {
+      if (altToolName === t.toolName) continue; // skip self
+      const altCategories = TOOL_CATEGORIES[altToolName];
+      if (!altCategories) continue;
+
+      // Check if any category overlaps
+      const hasOverlap = toolCategories.some((c) => altCategories.includes(c));
+      if (!hasOverlap) continue;
+
+      // Find cheapest plan for this alternative tool at the same seat count
+      for (const [planName, p] of Object.entries(altPricing)) {
+        if (!p) continue;
+        if (p.flatPrice === undefined && p.seatPrice === undefined) continue;
+        if (p.minSeats !== undefined && t.seats < p.minSeats) continue;
+
+        const cost = p.flatPrice !== undefined ? p.flatPrice : t.seats * (p.seatPrice ?? 0);
+        if (typeof cost === 'number' && isFinite(cost)) {
+          if (!cheapestAlt || cost < cheapestAlt.cost) {
+            cheapestAlt = { toolName: altToolName, plan: planName, cost };
+          }
+        }
+      }
+    }
+
+    if (cheapestAlt && cheapestAlt.cost < currentCostRef * 0.7) {
+      // ≥ 30% cheaper
+      const savings = currentCostRef - cheapestAlt.cost;
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        suggestedPlan: `${cheapestAlt.toolName} ${cheapestAlt.plan}`,
+        suggestedCost: cheapestAlt.cost,
+        savingsAmount: Math.round(savings),
+        explanation: `${cheapestAlt.toolName} (${cheapestAlt.plan}) at ~$${cheapestAlt.cost.toFixed(0)}/mo provides similar ${toolCategories[0]} capabilities and is ${Math.round((1 - cheapestAlt.cost / currentCostRef) * 100)}% cheaper.`,
+      });
+      findings.push(`${t.toolName} → ${cheapestAlt.toolName} ${cheapestAlt.plan} (save ~$${savings.toFixed(0)}/mo)`);
+    } else if (cheapestAlt) {
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        explanation: `Cheapest alternative is ${cheapestAlt.toolName} (${cheapestAlt.plan}) at ~$${cheapestAlt.cost.toFixed(0)}/mo — not substantially cheaper (< 30% difference).`,
+      });
+    } else {
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        explanation: 'No alternative tools with comparable capabilities found in our pricing model.',
+      });
+    }
+  }
+
+  const hasFindings = findings.length > 0;
+  return {
+    question: 'Substantially cheaper alternative',
+    status: hasFindings ? 'Yes' : (tools.length > 0 ? 'No' : 'Unknown'),
+    evidence: hasFindings
+      ? `Cheaper alternative tools found: ${findings.join('; ')}.`
+      : 'No substantially cheaper alternatives detected (all alternatives are within 30% of current cost).',
+    recommendation: hasFindings
+      ? 'Evaluate the suggested alternatives — they provide similar capabilities at materially lower cost.'
+      : 'Your current tools are price-competitive within their category.',
+    details,
+  };
+}
+
+/**
+ * Q4 — "Paying retail when they could get the same thing through credits?"
+ * Detect when seat-based retail plans could be replaced with API/credits for savings.
+ */
+function evaluateRetailVsCredits(tools: ToolConfig[]): PricingFitAnswer {
+  const details: PricingFitDetail[] = [];
+  const findings: string[] = [];
+
+  for (const t of tools) {
+    // Already on API/credits — no retail premium
+    if (t.plan === 'APIdirect' || t.plan === 'API') {
+      details.push({
+        toolName: t.toolName,
+        currentPlan: t.plan,
+        currentCost: t.monthlySpend,
+        explanation: 'Already on API/usage-based pricing — no retail markup detected.',
+      });
+      continue;
+    }
+
+    // Claude Pro/Max/Team with high spend → could use Anthropic API with prompt caching
+    if (t.toolName === 'Claude' && ['Pro', 'Max', 'Team', 'Enterprise'].includes(t.plan)) {
+      if (t.monthlySpend >= 100) {
+        const estimatedAPICost = Math.round(t.monthlySpend * 0.35); // ~65% savings with caching
+        details.push({
+          toolName: t.toolName,
+          currentPlan: t.plan,
+          currentCost: t.monthlySpend,
+          suggestedPlan: 'Anthropic API + Prompt Caching',
+          suggestedCost: estimatedAPICost,
+          savingsAmount: t.monthlySpend - estimatedAPICost,
+          explanation: `At $${t.monthlySpend}/mo on ${t.plan}, routing heavy or repeatable workloads through the Anthropic API with prompt caching (up to 90% discount on cached prompts) could reduce costs to ~$${estimatedAPICost}/mo.`,
+        });
+        findings.push(`${t.toolName} ${t.plan}: ~$${t.monthlySpend - estimatedAPICost}/mo savings via API credits`);
+      } else {
+        details.push({
+          toolName: t.toolName,
+          currentPlan: t.plan,
+          currentCost: t.monthlySpend,
+          explanation: `At $${t.monthlySpend}/mo, the convenience of the ${t.plan} seat plan likely outweighs API integration overhead.`,
+        });
+      }
+      continue;
+    }
+
+    // ChatGPT Plus/Team with significant spend → could route via OpenAI API
+    if (t.toolName === 'ChatGPT' && ['Plus', 'Team', 'Enterprise'].includes(t.plan)) {
+      if (t.monthlySpend >= 80) {
+        const estimatedAPICost = Math.round(t.monthlySpend * 0.4); // ~60% savings at token rates
+        details.push({
+          toolName: t.toolName,
+          currentPlan: t.plan,
+          currentCost: t.monthlySpend,
+          suggestedPlan: 'OpenAI API (token-based)',
+          suggestedCost: estimatedAPICost,
+          savingsAmount: t.monthlySpend - estimatedAPICost,
+          explanation: `With $${t.monthlySpend}/mo on ${t.plan}, heavy usage patterns may be cheaper via the OpenAI API at per-token rates (~$${estimatedAPICost}/mo estimated).`,
+        });
+        findings.push(`${t.toolName} ${t.plan}: ~$${t.monthlySpend - estimatedAPICost}/mo savings via API`);
+      } else {
+        details.push({
+          toolName: t.toolName,
+          currentPlan: t.plan,
+          currentCost: t.monthlySpend,
+          explanation: `At $${t.monthlySpend}/mo, ${t.plan}'s convenience and included features justify retail pricing.`,
+        });
+      }
+      continue;
+    }
+
+    // Gemini Pro/Ultra → Google Cloud committed-use discounts
+    if (t.toolName === 'Gemini' && ['Pro', 'Ultra'].includes(t.plan)) {
+      if (t.monthlySpend >= 50) {
+        const estimatedCreditCost = Math.round(t.monthlySpend * 0.45);
+        details.push({
+          toolName: t.toolName,
+          currentPlan: t.plan,
+          currentCost: t.monthlySpend,
+          suggestedPlan: 'Google Cloud AI credits',
+          suggestedCost: estimatedCreditCost,
+          savingsAmount: t.monthlySpend - estimatedCreditCost,
+          explanation: `At $${t.monthlySpend}/mo on ${t.plan}, Google Cloud committed-use discounts or Vertex AI pricing could reduce costs to ~$${estimatedCreditCost}/mo.`,
+        });
+        findings.push(`${t.toolName} ${t.plan}: ~$${t.monthlySpend - estimatedCreditCost}/mo savings via Cloud credits`);
+      } else {
+        details.push({
+          toolName: t.toolName,
+          currentPlan: t.plan,
+          currentCost: t.monthlySpend,
+          explanation: `At $${t.monthlySpend}/mo, retail ${t.plan} pricing is reasonable for your usage level.`,
+        });
+      }
+      continue;
+    }
+
+    // Tools without API alternatives (Cursor, Copilot, etc.)
+    details.push({
+      toolName: t.toolName,
+      currentPlan: t.plan,
+      currentCost: t.monthlySpend,
+      explanation: `${t.toolName} doesn't offer an API/credit-based alternative — seat pricing is the standard model.`,
+    });
+  }
+
+  const hasFindings = findings.length > 0;
+  return {
+    question: 'Paying retail vs credits',
+    status: hasFindings ? 'Yes' : 'No',
+    evidence: hasFindings
+      ? `Retail-to-credits savings opportunities found: ${findings.join('; ')}.`
+      : 'No significant retail-vs-credits savings detected — your current pricing models are appropriate.',
+    recommendation: hasFindings
+      ? 'Explore API/credit-based pricing for tools with high spend. This requires some integration work but can yield substantial savings.'
+      : 'Your current plan types are appropriate for your spend levels.',
+    details,
+  };
+}
+
+// =========================================================================
+// MAIN ENGINE
+// =========================================================================
+
 /**
  * Main optimization engine
  * Returns all recommendations and total savings
@@ -227,7 +763,6 @@ export function optimizeToolStack(
   primaryUseCase: UseCase = 'mixed'
 ): OptimizationResult {
   const recommendations: Recommendation[] = [];
-  const pricingFitAnswers: PricingFitAnswer[] = [];
   const seenToolIds = new Set<string>();
 
   const currentMonthlySpend = tools.reduce((sum, tool) => sum + tool.monthlySpend, 0);
@@ -283,146 +818,14 @@ export function optimizeToolStack(
   }
 
   // ==============================
-  // Pricing Plan Fit & Alternatives
+  // Pricing Plan Fit & Alternatives — using dedicated evaluator functions
   // ==============================
-
-  // 1) Right plan for usage (overkill) heuristic: seat floors / mis-sized tiers
-  const overkillIssues: string[] = [];
-  const anyClaudeTeamUnder5 = tools.some(
-    (t) => t.toolName === 'Claude' && t.plan === 'Team' && t.seats < 5
-  );
-  const anyCursorBusinessUnder10 = tools.some(
-    (t) => t.toolName === 'Cursor' && t.plan === 'Business' && t.seats < 10
-  );
-
-  if (anyClaudeTeamUnder5) overkillIssues.push('Claude Team has a strict 5-seat minimum billing floor.');
-  if (anyCursorBusinessUnder10)
-    overkillIssues.push('Cursor Business has a small-team economics floor; Pro is typically cheaper below 10 seats.');
-
-  pricingFitAnswers.push({
-    question: 'Right plan for usage',
-    status: overkillIssues.length > 0 ? 'No' : 'Yes',
-    evidence:
-      overkillIssues.length > 0
-        ? `Detected plan/seat overkill: ${overkillIssues.join(' ')}`
-        : 'No plan/seat floor violations detected with the rules in this audit.',
-    recommendation:
-      overkillIssues.length > 0
-        ? 'Adjust seats/plan tiers to meet vendor billing floors (e.g., downgrade to Pro where applicable).'
-        : 'Your current plan selections align with the seat-floor rules used by this audit.',
-  });
-
-  // 2) Cheaper plan from same vendor
-  const cheaperSameVendorFindings: string[] = [];
-  for (const t of tools) {
-    const toolPricing = TOOL_PLAN_PRICING[t.toolName];
-    if (!toolPricing) continue;
-
-    const candidatePlans = Object.keys(toolPricing);
-    const candidates: { plan: string; expected: number }[] = [];
-
-    for (const plan of candidatePlans) {
-      const p = toolPricing[plan];
-      if (!p) continue;
-      if (p.flatPrice === undefined && p.seatPrice === undefined) continue;
-      // Only compare compatible tiers.
-      if (p.minSeats !== undefined && t.seats < p.minSeats) continue;
-
-      const expected = p.flatPrice !== undefined ? p.flatPrice : t.seats * (p.seatPrice ?? 0);
-      if (typeof expected === 'number' && isFinite(expected)) {
-        candidates.push({ plan, expected });
-      }
-    }
-
-    if (candidates.length === 0) continue;
-
-    const cheapest = candidates.reduce((a, b) => (a.expected < b.expected ? a : b));
-    if (cheapest.plan !== t.plan) {
-      const currentExpected = estimateExpectedSpend(t);
-      // If we can estimate, flag only if model suggests you’re paying more than ~5% over cheapest.
-      if (currentExpected !== null && currentExpected > cheapest.expected * 1.05) {
-        cheaperSameVendorFindings.push(
-          `${t.toolName}: ${t.plan} → ${cheapest.plan} (cheapest expected tier ≈ $${cheapest.expected.toFixed(0)}/mo)`
-        );
-      }
-    }
-  }
-
-  pricingFitAnswers.push({
-    question: 'Cheaper plan from same vendor',
-    status: cheaperSameVendorFindings.length > 0 ? 'No' : 'Yes',
-    evidence:
-      cheaperSameVendorFindings.length > 0
-        ? `Cheaper same-vendor tiers detected: ${cheaperSameVendorFindings.join('; ')}`
-        : 'No cheaper same-vendor tiers detected within the tier model used by this audit.',
-    recommendation:
-      cheaperSameVendorFindings.length > 0
-        ? 'Downgrade/re-tier to the cheapest compatible plan tier, then re-run the audit with updated spend.'
-        : 'Keep your current tier; it appears cost-competitive within modeled pricing.',
-  });
-
-  // 3) Substantially cheaper alternative tool (conservative)
-  const cheapestPerTool: Record<string, number> = {};
-  for (const toolName of Object.keys(TOOL_PLAN_PRICING)) {
-    const toolPricing = TOOL_PLAN_PRICING[toolName];
-    const anyToolConfig = tools.find((t) => t.toolName === toolName);
-    const seats = anyToolConfig?.seats ?? 1;
-
-    const candidates: number[] = [];
-    for (const plan of Object.keys(toolPricing)) {
-      const p = toolPricing[plan];
-      if (!p) continue;
-      if (p.flatPrice === undefined && p.seatPrice === undefined) continue;
-      if (p.minSeats !== undefined && seats < p.minSeats) continue;
-
-      const expected = p.flatPrice !== undefined ? p.flatPrice : seats * (p.seatPrice ?? 0);
-      if (typeof expected === 'number' && isFinite(expected)) candidates.push(expected);
-    }
-
-    if (candidates.length > 0) {
-      cheapestPerTool[toolName] = Math.min(...candidates);
-    }
-  }
-
-  const lowestCurrentSpend = tools.reduce((min, t) => Math.min(min, t.monthlySpend), Infinity);
-
-  let alternativeTool: string | null = null;
-  let alternativeEvidence: string | null = null;
-
-  for (const [toolName, cheapestExpected] of Object.entries(cheapestPerTool)) {
-    // Only consider alternatives that are materially cheaper than your cheapest current spend
-    if (cheapestExpected < lowestCurrentSpend * 0.7) {
-      alternativeTool = toolName;
-      alternativeEvidence = `Modeled cheapest tier for ${toolName} ≈ $${cheapestExpected.toFixed(0)}/mo vs your cheapest current spend $${lowestCurrentSpend.toFixed(0)}/mo.`;
-      break;
-    }
-  }
-
-  pricingFitAnswers.push({
-    question: 'Substantially cheaper alternative',
-    status: alternativeTool ? 'Yes' : 'Unknown',
-    evidence:
-      alternativeTool && alternativeEvidence
-        ? `Cheaper alternative tool detected. ${alternativeEvidence}`
-        : 'No substantially cheaper alternative detected with the limited modeled pricing and your provided spend values.',
-    recommendation:
-      alternativeTool
-        ? `Evaluate replacing a portion of your ${tools[0]?.toolName ?? 'current'} usage with ${alternativeTool} at its lowest modeled tier, then re-run the audit.`
-        : 'Provide more tools/spend inputs (and actual plan pricing details) to surface stronger cross-vendor alternatives.',
-  });
-
-  // 4) Paying retail vs credits (inputs don’t distinguish)
-  const hasAPIDirect = tools.some((t) => t.plan === 'APIdirect' || t.plan === 'API');
-  const anySpendEntered = tools.some((t) => t.monthlySpend > 0);
-
-  pricingFitAnswers.push({
-    question: 'Paying retail vs credits',
-    status: hasAPIDirect && anySpendEntered ? 'Unknown' : 'Unknown',
-    evidence:
-      'This audit inputs include monthly spend, but do not indicate whether that spend is prepaid credits vs retail usage charges. The calculation cannot confirm the mechanism.',
-    recommendation:
-      'If your API usage supports prepaid credits, check whether you can switch from pay-as-you-go retail billing to credits/prepaid to reduce effective unit cost, then update monthly spend and re-run.',
-  });
+  const pricingFitAnswers: PricingFitAnswer[] = [
+    evaluateRightPlanForUsage(tools),
+    evaluateCheaperSameVendor(tools),
+    evaluateCheaperAlternative(tools),
+    evaluateRetailVsCredits(tools),
+  ];
 
   const totalMonthlySavings = recommendations.reduce((sum, rec) => sum + rec.monthlySavings, 0);
   const totalAnnualSavings = totalMonthlySavings * 12;
@@ -445,4 +848,3 @@ export function optimizeToolStack(
 export function getPricingTierName(toolName: string, plan: string): string {
   return `${toolName} ${plan}`;
 }
-
