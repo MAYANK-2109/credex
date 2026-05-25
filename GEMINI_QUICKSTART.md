@@ -6,13 +6,6 @@ Check your `.env.local` file:
 ```bash
 cat .env.local | head -10
 ```
-
-Should show:
-```
-GEMINI_API_KEY_PRIMARY=AIzaSyA0kQ2W7jASYqrFPLjfcwe1o4fB4r_4f84
-GEMINI_API_KEY_SECONDARY=AIzaSyCsfsVQfvMpYsChn7cV_Z2HMeU78sbMiiQ
-```
-
 ✅ If you see valid keys → Go to Step 2  
 ❌ If empty or missing → Get free key at https://ai.google.dev/
 
