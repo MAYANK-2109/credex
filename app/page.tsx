@@ -88,6 +88,7 @@ export default function OptimizerPage() {
   // Results state
   const [hasCalculated, setHasCalculated] = useState(false);
   const [summary, setSummary] = useState<string>('');
+  const [summarySource, setSummarySource] = useState<'primary' | 'secondary' | 'fallback' | ''>('');
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const [leadCaptureVisible, setLeadCaptureVisible] = useState(false);
   const [leadCaptureError, setLeadCaptureError] = useState('');
@@ -230,6 +231,7 @@ export default function OptimizerPage() {
     );
 
     setSummary(summaryResponse.text);
+    setSummarySource(summaryResponse.source);
     setIsSummaryLoading(false);
 
     if (result.totalMonthlySavings > 500) {
@@ -255,6 +257,8 @@ export default function OptimizerPage() {
           teamSize,
           primaryUseCase,
           toolCount: selectedTools.length,
+          honeypot: data.honeypot || '',
+          savings: optimizationResult ? optimizationResult.totalMonthlySavings : 0,
         }),
       });
 
@@ -845,13 +849,16 @@ export default function OptimizerPage() {
               selectedToolNames={selectedTools.map(t => t.toolName)}
               onConsultationClick={() => setLeadCaptureVisible(true)}
               onNotifyClick={() => setLeadCaptureVisible(true)}
+              summary={summary}
+              summarySource={summarySource}
+              isSummaryLoading={isSummaryLoading}
             />
 
-            {/* Fixed Back Button for optimal flow */}
             <button
               onClick={() => {
                 setHasCalculated(false);
                 setSummary('');
+                setSummarySource('');
               }}
               className="fixed bottom-6 left-6 z-30 px-5 py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-light)] hover:border-[var(--border-glow)] text-[var(--text-primary)] text-sm font-bold shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5"
             >

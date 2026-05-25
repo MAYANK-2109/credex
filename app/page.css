@@ -2,3 +2,61 @@
   --accent-purple: #7c3aed;
   --accent-neon: #0ae5ff;
 }
+
+/* Responsive utilities */
+.text-responsive-title {
+  font-size: clamp(1.75rem, 8vw, 3.5rem);
+  line-height: 1.2;
+}
+
+.text-responsive-heading {
+  font-size: clamp(1.25rem, 5vw, 2rem);
+  line-height: 1.2;
+}
+
+.text-responsive-subheading {
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  line-height: 1.5;
+}
+
+.text-responsive-body {
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  line-height: 1.6;
+}
+
+.padding-responsive {
+  padding: clamp(1rem, 5vw, 2rem);
+}
+
+.padding-responsive-lg {
+  padding: clamp(1.5rem, 7vw, 3rem);
+}
+
+.gap-responsive {
+  gap: clamp(0.75rem, 3vw, 1.5rem);
+}
+
+/* Responsive images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Responsive video/iframe container */
+.responsive-video-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+.responsive-video-container iframe,
+.responsive-video-container video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}

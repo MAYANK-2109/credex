@@ -25,6 +25,40 @@ A Next.js app for auditing AI tool spend, discovering redundant plans, and recom
 - `npm test` — run Jest tests
 - `npm run format` — run Prettier formatting
 
+## 🤖 Gemini AI Setup (For AI Summaries)
+
+The app uses Google's Gemini API to generate personalized AI audit summaries.
+
+### Quick Start
+
+1. **Get a free API key:**
+   - Visit https://ai.google.dev/
+   - Click "Get API Key"
+   - Create a new key in Google Cloud Console
+
+2. **Add to `.env.local`:**
+   ```
+   GEMINI_API_KEY_PRIMARY=AIzaSyA...
+   GEMINI_API_KEY_SECONDARY=AIzaSyC...
+   ```
+
+3. **Test the connection:**
+   ```bash
+   npm run dev
+   curl http://localhost:3000/api/gemini-test
+   ```
+
+For detailed setup and troubleshooting, see [GEMINI_QUICKSTART.md](GEMINI_QUICKSTART.md).
+
+## Environment Variables
+
+All required environment variables are documented in [.env.example](.env.example) and [ENV_SETUP.md](ENV_SETUP.md).
+
+Key variables:
+- `GEMINI_API_KEY_PRIMARY` — Primary Gemini API key
+- `GEMINI_API_KEY_SECONDARY` — Backup Gemini API key (optional)
+- `NEXT_PUBLIC_SITE_URL` — Your site's public URL
+
 ## Architecture & Design
 
 See [Architecture Diagram](docs/architecture.md) for system overview and data flow.

@@ -8,16 +8,18 @@
 :root {
   --font-heading: 'Helvetica Now Display Bold', sans-serif;
   --font-body: 'Inter', sans-serif;
-  --color-text: #192837;
-  --color-accent: #7342E2;
-  --color-login-bg: #F2F2EE;
 
+  /* Dark Mode - Background Colors */
   --bg-primary: #090d16;
   --bg-secondary: rgba(15, 23, 42, 0.6);
   --bg-card: rgba(20, 30, 54, 0.7);
-  --text-primary: var(--color-text);
-  --text-secondary: #94a3b8;
+
+  /* Dark Mode - Text Colors (Light text for dark background) */
+  --text-primary: #f0f0f0;
+  --text-secondary: #b0b8c4;
+  --text-tertiary: #7a8592;
   
+  /* Accent Colors for Dark Mode */
   --accent-primary: #10b981;
   --accent-secondary: #34d399;
   --accent-purple: #818cf8;
@@ -27,6 +29,7 @@
   --success-green: #10b981;
   --warning-orange: #f59e0b;
   
+  /* Border and Shadow for Dark Mode */
   --border-light: rgba(255, 255, 255, 0.08);
   --border-glow: rgba(6, 182, 212, 0.15);
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
@@ -39,12 +42,17 @@
 
 /* Light Theme overrides when .light is present on html element */
 .light {
+  /* Light Mode - Background Colors */
   --bg-primary: #f8fafc;
   --bg-secondary: rgba(255, 255, 255, 0.7);
   --bg-card: rgba(255, 255, 255, 0.85);
+
+  /* Light Mode - Text Colors (Dark text for light background) */
   --text-primary: #0f172a;
   --text-secondary: #475569;
+  --text-tertiary: #64748b;
   
+  /* Accent Colors for Light Mode */
   --accent-primary: #059669;
   --accent-secondary: #10b981;
   --accent-purple: #4f46e5;
@@ -54,6 +62,7 @@
   --success-green: #059669;
   --warning-orange: #d97706;
   
+  /* Border and Shadow for Light Mode */
   --border-light: rgba(15, 23, 42, 0.08);
   --border-glow: rgba(8, 145, 178, 0.1);
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -75,6 +84,13 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 15px;
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -94,10 +110,122 @@ button {
   cursor: pointer;
   border: none;
   background: none;
+  min-height: 44px;
+  padding: 0;
 }
 
 input, select {
   font-family: inherit;
+  font-size: 16px;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+/* Ensure proper touch targets on mobile */
+@media (max-width: 768px) {
+  button, input[type="button"], input[type="submit"], input[type="reset"], input[type="file"]::file-selector-button {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0.75rem 1rem;
+  }
+  
+  a[role="button"], 
+  button[type="button"],
+  .primaryButton,
+  .secondaryButton {
+    min-height: 48px;
+  }
+}
+
+/* Responsive iframe container */
+.iframe-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+}
+
+.iframe-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Improve text legibility on mobile */
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.625rem;
+  }
+  
+  h3 {
+    font-size: 1.125rem;
+  }
+}
+
+/* Ensure full width and proper scrolling on mobile */
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Better form input rendering on iOS */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+textarea,
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 4px;
+  padding: 0.75rem;
+}
+
+input[type="text"]:disabled,
+input[type="email"]:disabled,
+input[type="number"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive utility classes */
+.container-responsive {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-responsive {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-responsive {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Safe area support for notched devices */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
 }
 
 /* Glassmorphism panels & visual structures */
