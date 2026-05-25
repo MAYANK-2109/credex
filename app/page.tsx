@@ -348,30 +348,32 @@ export default function OptimizerPage() {
       </div>
 
       {/* Sleek Navigation Header */}
-      <nav className="w-full max-w-6xl mx-auto px-6 py-5 flex items-center justify-between border-b border-[var(--border-light)] relative z-10">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 via-emerald-400 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-            <Coins className="w-4 h-4 text-white" />
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-4xl px-4">
+        <nav className="w-full px-6 py-4 flex items-center justify-between bg-black/60 backdrop-blur-md rounded-full border border-white/10 shadow-2xl">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 via-emerald-400 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+              <Coins className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-extrabold text-xl tracking-tight font-display text-white">
+              AI Spend <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Audit</span>
+            </span>
           </div>
-          <span className="font-extrabold text-xl tracking-tight font-display">
-            AI Spend <span className="gradient-text">Audit</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <a href="#calculator" className="hidden md:inline text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">Savings Estimator</a>
-          <a href="#features" className="hidden md:inline text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">Features</a>
-          <a href="#audit-tool" className="text-sm font-semibold px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Start Audit</a>
-          
-          {/* Smart Theme Switcher Switch */}
-          <button 
-            onClick={toggleTheme}
-            className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-light)] hover:border-[var(--border-glow)] flex items-center justify-center text-[var(--text-primary)] shadow-sm hover:scale-[1.05] active:scale-[0.95] transition-all"
-            aria-label="Toggle light/dark theme"
-          >
-            {theme === 'dark' ? <Sun className="w-[18px] h-[18px] text-amber-400" /> : <Moon className="w-[18px] h-[18px] text-indigo-600" />}
-          </button>
-        </div>
-      </nav>
+          <div className="flex items-center gap-6">
+            <a href="#calculator" className="hidden md:inline text-sm font-medium text-gray-300 hover:text-white transition-colors">Savings Estimator</a>
+            <a href="#features" className="hidden md:inline text-sm font-medium text-gray-300 hover:text-white transition-colors">Features</a>
+            <a href="#audit-tool" className="text-sm font-semibold px-5 py-2 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Start Audit</a>
+            
+            {/* Smart Theme Switcher Switch */}
+            <button 
+              onClick={toggleTheme}
+              className="w-10 h-10 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 flex items-center justify-center text-white shadow-sm hover:scale-[1.05] active:scale-[0.95] transition-all"
+              aria-label="Toggle light/dark theme"
+            >
+              {theme === 'dark' ? <Sun className="w-[18px] h-[18px] text-amber-400" /> : <Moon className="w-[18px] h-[18px] text-indigo-400" />}
+            </button>
+          </div>
+        </nav>
+      </div>
 
       {/* Main Page Layout */}
       <div className="w-full max-w-6xl mx-auto px-6 relative z-10 pt-12">
@@ -379,156 +381,59 @@ export default function OptimizerPage() {
         {!hasCalculated ? (
           <>
             {/* HERO SECTION */}
-            <header className="text-center mb-16 md:mb-24 flex flex-col items-center">
-              
-              {/* Pulsing Active Audits Badge */}
-              <div className="mb-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--bg-secondary)] border border-[var(--border-light)] text-xs font-semibold text-[var(--accent-primary)] shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-[var(--accent-primary)] animate-pulse"></span>
-                <span>{statCounter.toLocaleString()} AI Audits Completed Globally</span>
-              </div>
+            <header className="relative w-screen h-screen min-h-[600px] mb-24 overflow-hidden left-1/2 -translate-x-1/2">
+               {/* Video Background */}
+               <video 
+                 autoPlay 
+                 loop 
+                 muted 
+                 playsInline 
+                 className="absolute inset-0 w-full h-full object-cover"
+               >
+                 <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260518_003132_8b7edcb6-c64d-4a52-a9ca-879942e122ad.mp4" type="video/mp4" />
+               </video>
+               
+               {/* Overlay (optional, depending on the video's brightness; kept very subtle) */}
+               <div className="absolute inset-0 bg-white/20"></div>
+               
+               {/* Content - Positioned Middle Left */}
+               <div className="absolute top-1/2 -translate-y-1/2 left-6 md:left-20 lg:left-32 z-10 flex flex-col items-start text-left max-w-2xl w-[90%] md:w-auto">
+                 
+                 {/* Text Content Container (No background) */}
+                 <div className="w-full">
+                   {/* Pulsing Active Audits Badge */}
+                   <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-login-bg)] border border-[var(--color-accent)]/20 text-xs font-semibold text-[var(--color-text)] shadow-sm">
+                     <span className="w-2 h-2 rounded-full bg-[var(--color-accent)] animate-pulse"></span>
+                     <span>{statCounter.toLocaleString()} AI Audits Completed Globally</span>
+                   </div>
 
-              {/* Headline with Dramatic Typography */}
-              <h1 className="font-extrabold text-4xl md:text-6xl max-w-4xl tracking-tight leading-[1.1] mb-6 font-display text-[var(--text-primary)]">
-                Stop Wasting Money on <br className="hidden sm:inline" />
-                <span className="gradient-text font-black">Over-Allocated AI Plans</span>
-              </h1>
-              
-              <p className="text-base md:text-lg text-[var(--text-secondary)] max-w-2xl leading-relaxed mb-10 font-normal">
-                Instantly scan your team's AI subscriptions, expose redundant seat allocations, and consolidate into optimized tiers. Completely free, founder-grade audit.
-              </p>
+                   {/* Headline */}
+                   <h1 className="font-extrabold text-4xl md:text-6xl tracking-tight leading-[1.1] mb-6 font-display text-[var(--color-text)]">
+                     Stop Wasting Money on <br />
+                     <span className="font-black">Over-Allocated AI Plans</span>
+                   </h1>
+                   
+                   <p className="text-base md:text-xl text-[var(--color-text)]/80 leading-relaxed mb-10 font-normal">
+                     Instantly scan your team's AI subscriptions, expose redundant seat allocations, and consolidate into optimized tiers. Completely free, founder-grade audit.
+                   </p>
 
-              {/* Action Buttons & Visual Badges */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-16 w-full max-w-md justify-center">
-                <a 
-                  href="#audit-tool" 
-                  className="px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-500 via-cyan-500 to-emerald-500 text-white font-bold text-base text-center shadow-xl shadow-cyan-500/20 hover:shadow-cyan-500/35 hover:scale-[1.02] active:scale-[0.98] transition-all relative overflow-hidden group"
-                >
-                  <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-emerald-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    Run Custom Stack Audit <ArrowRight className="w-4 h-4" />
-                  </span>
-                </a>
-                <a 
-                  href="#calculator" 
-                  className="px-8 py-4 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-light)] hover:border-[var(--border-glow)] text-[var(--text-primary)] font-bold text-base text-center hover:scale-[1.02] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2"
-                >
-                  Quick Estimator
-                </a>
-              </div>
-
-              {/* HERO INTERACTIVE GRAPHIC / PREVIEW */}
-              <div className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch mb-24">
-                
-                {/* Custom Animated Piggy Bank Graphic (left) */}
-                <div className="glass-panel md:col-span-7 flex flex-col justify-between overflow-hidden relative p-8 group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10">
-                    <Activity className="w-48 h-48 text-[var(--accent-neon)]" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Sparkles className="w-5 h-5 text-indigo-400" />
-                      <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">Credex Optimization Stream</span>
-                    </div>
-                    <h3 className="text-xl font-bold font-display text-[var(--text-primary)] mb-2">Automated Savings Flow</h3>
-                    <p className="text-sm text-[var(--text-secondary)] mb-6">Visualizing your AI seat audit consolidating waste into real bottom-line capital.</p>
-                  </div>
-                  
-                  {/* Glowing Flow Chart Graphic */}
-                  <div className="w-full h-44 flex items-center justify-center relative">
-                    <svg className="w-full h-full" viewBox="0 0 400 160">
-                      <defs>
-                        <linearGradient id="flow-line-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stopColor="#818cf8" stopOpacity="0.2" />
-                          <stop offset="50%" stopColor="#06b6d4" stopOpacity="1" />
-                          <stop offset="100%" stopColor="#10b981" stopOpacity="1" />
-                        </linearGradient>
-                        <radialGradient id="piggy-glow" cx="50%" cy="50%" r="50%">
-                          <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
-                          <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-                        </radialGradient>
-                      </defs>
-
-                      {/* Tool Source Bubbles (Left) */}
-                      <g transform="translate(40, 25)" className="animate-float">
-                        <circle cx="0" cy="0" r="18" fill="rgba(15, 23, 42, 0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-                        <text x="0" y="4" textAnchor="middle" fill="#fff" fontSize="8" fontWeight="bold">GPT</text>
-                      </g>
-                      <g transform="translate(45, 80)" className="animate-float-reverse">
-                        <circle cx="0" cy="0" r="18" fill="rgba(15, 23, 42, 0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-                        <text x="0" y="4" textAnchor="middle" fill="#fff" fontSize="8" fontWeight="bold">CLD</text>
-                      </g>
-                      <g transform="translate(40, 135)" className="animate-float">
-                        <circle cx="0" cy="0" r="18" fill="rgba(15, 23, 42, 0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-                        <text x="0" y="4" textAnchor="middle" fill="#fff" fontSize="8" fontWeight="bold">GEM</text>
-                      </g>
-
-                      {/* Flow Connections */}
-                      <path d="M 58 25 Q 180 25 320 80" fill="none" stroke="url(#flow-line-grad)" strokeWidth="2.5" strokeDasharray="6, 6" />
-                      <path d="M 63 80 H 310" fill="none" stroke="url(#flow-line-grad)" strokeWidth="3" />
-                      <path d="M 58 135 Q 180 135 320 80" fill="none" stroke="url(#flow-line-grad)" strokeWidth="2.5" strokeDasharray="6, 6" />
-
-                      {/* Floating Coins on paths */}
-                      <circle cx="160" cy="40" r="4.5" fill="#f59e0b" className="animate-float" />
-                      <circle cx="210" cy="80" r="5" fill="#f59e0b" className="animate-pulse" />
-                      <circle cx="140" cy="120" r="4.5" fill="#f59e0b" className="animate-float-reverse" />
-
-                      {/* Piggy Bank / Savings Hub Shield (Right) */}
-                      <g transform="translate(330, 80)">
-                        <circle cx="0" cy="0" r="28" fill="url(#piggy-glow)" />
-                        <circle cx="0" cy="0" r="24" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" strokeWidth="2" />
-                        {/* Custom piggy icon */}
-                        <path d="M -8 -4 Q -12 -2 -12 2 H -10 Q -6 8 0 8 Q 6 8 10 2 H 12 Q 12 -2 8 -4 Z" fill="#10b981" />
-                        <circle cx="-3" cy="-3" r="1" fill="#fff" />
-                        <circle cx="3" cy="-3" r="1" fill="#fff" />
-                        <path d="M 0 -12 V -8 M -2 -10 H 2" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" />
-                      </g>
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Dashboard Mock Metrics (right) */}
-                <div className="glass-panel md:col-span-5 flex flex-col justify-between p-8 relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent pointer-events-none"></div>
-                  
-                  {/* Metric Block */}
-                  <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2 block">Live Intelligence Feed</span>
-                    <h3 className="text-lg font-bold font-display text-[var(--text-primary)] mb-4">Sample Organization Impact</h3>
-                    
-                    {/* Sparkline & Counter */}
-                    <div className="flex items-baseline gap-2 mb-2">
-                      <span className="text-4xl font-extrabold tracking-tight text-[var(--accent-primary)] font-display">$340</span>
-                      <span className="text-xs font-semibold text-[var(--text-secondary)]">Saved Monthly</span>
-                    </div>
-
-                    <div className="w-full h-12 flex items-center justify-between mb-4">
-                      {/* SVG Sparkline Spark */}
-                      <svg className="w-full h-full" viewBox="0 0 160 40">
-                        <defs>
-                          <linearGradient id="spark-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
-                            <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-                          </linearGradient>
-                        </defs>
-                        <path d="M 0 35 L 20 30 L 50 32 L 80 18 L 110 20 L 140 5 L 160 8" fill="none" stroke="#10b981" strokeWidth="2" />
-                        <path d="M 0 35 L 20 30 L 50 32 L 80 18 L 110 20 L 140 5 L 160 8 L 160 40 L 0 40 Z" fill="url(#spark-grad)" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Micro glass card overlay */}
-                  <div className="p-3.5 rounded-xl bg-slate-900/30 border border-white/5 flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded bg-emerald-500/10 flex items-center justify-center">
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      </div>
-                      <span className="font-semibold">Claude Team Consolidation</span>
-                    </div>
-                    <span className="font-bold text-emerald-400">Save $220/mo</span>
-                  </div>
-                </div>
-
-              </div>
+                   {/* Action Buttons */}
+                   <div className="flex flex-col sm:flex-row gap-4 justify-start">
+                     <a 
+                       href="#calculator" 
+                       className="px-8 py-4 rounded-full bg-white/80 hover:bg-white border border-[var(--color-text)]/10 text-[var(--color-text)] font-bold text-base text-center transition-all flex items-center justify-center shadow-sm"
+                     >
+                       Quick Estimator
+                     </a>
+                     <a 
+                       href="#audit-tool" 
+                       className="px-8 py-4 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 text-white font-bold text-base text-center shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                     >
+                       Run Custom Stack Audit <ArrowRight className="w-4 h-4" />
+                     </a>
+                   </div>
+                 </div>
+               </div>
             </header>
 
             {/* QUICK ESTIMATOR / SAVINGS CALCULATOR */}
