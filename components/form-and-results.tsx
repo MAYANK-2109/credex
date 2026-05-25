@@ -2,7 +2,8 @@
 
 import React, { useRef } from 'react';
 import { ChevronDown, Trash2 } from 'lucide-react';
-import type { UseCase, ToolConfig, Recommendation } from '@/lib/optimization-engine';
+import type { UseCase, ToolConfig, Recommendation, OptimizationResult } from '@/lib/optimization-engine';
+import { generateAuditPDF } from '@/lib/generate-pdf-report';
 import styles from './credex.module.css';
 
 /* ============================================================================
@@ -454,11 +455,29 @@ export function PricingFitCard({ answer }: PricingFitCardProps) {
    CTA COMPONENTS
    ============================================================================ */
 
-export function SavingsCTA({ savings, onConsultationClick, onNotifyClick }: {
+export function SavingsCTA({ savings, optimizationResult, teamSize, selectedToolNames, onConsultationClick, onNotifyClick }: {
   savings: number;
+  optimizationResult: OptimizationResult;
+  teamSize: number;
+  selectedToolNames: string[];
   onConsultationClick: () => void;
   onNotifyClick: () => void;
 }) {
+  // Handler to copy current page URL to clipboard
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      alert('Result URL copied to clipboard!');
+    } catch (err) {
+      console.error('Copy failed', err);
+    }
+  };
+
+  // Handler to generate and download a professionally formatted PDF report
+  const handleDownloadReport = () => {
+    generateAuditPDF(optimizationResult, teamSize, selectedToolNames);
+  };
+
   if (savings > 500) {
     return (
       <div style={{ marginTop: '3rem', textAlign: 'center' }}>
@@ -468,6 +487,15 @@ export function SavingsCTA({ savings, onConsultationClick, onNotifyClick }: {
         <button onClick={onConsultationClick} className={styles.primaryButton}>
           Book a Credex Consultation
         </button>
+        {/* Secondary actions */}
+        <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
+          <button onClick={handleShare} className={styles.secondaryButton}>
+            Share Result URL
+          </button>
+          <button onClick={handleDownloadReport} className={styles.secondaryButton}>
+            Download Report
+          </button>
+        </div>
       </div>
     );
   }
@@ -478,11 +506,32 @@ export function SavingsCTA({ savings, onConsultationClick, onNotifyClick }: {
         <button onClick={onNotifyClick} className={styles.primaryButton} style={{ background: 'rgba(255, 255, 255, 0.1)', boxShadow: 'none' }}>
           Notify me when new optimizations apply
         </button>
+        {/* Secondary actions */}
+        <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
+          <button onClick={handleShare} className={styles.secondaryButton}>
+            Share Result URL
+          </button>
+          <button onClick={handleDownloadReport} className={styles.secondaryButton}>
+            Download Report
+          </button>
+        </div>
       </div>
     );
   }
 
-  return null;
+  // For savings between 100 and 500, still show share/download
+  return (
+    <div style={{ marginTop: '3rem', textAlign: 'center' }}>
+      <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
+        <button onClick={handleShare} className={styles.secondaryButton}>
+          Share Result URL
+        </button>
+        <button onClick={handleDownloadReport} className={styles.secondaryButton}>
+          Download Report
+        </button>
+      </div>
+    </div>
+  );
 }
 
 /* ============================================================================

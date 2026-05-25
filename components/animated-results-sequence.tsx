@@ -13,6 +13,8 @@ import React from 'react';
 interface AnimatedResultsSequenceProps {
   optimizationResult: OptimizationResult;
   savings: number;
+  teamSize: number;
+  selectedToolNames: string[];
   onConsultationClick: () => void;
   onNotifyClick: () => void;
 }
@@ -22,6 +24,8 @@ interface AnimatedResultsSequenceProps {
 export function AnimatedResultsSequence({
   optimizationResult,
   savings,
+  teamSize,
+  selectedToolNames,
   onConsultationClick,
   onNotifyClick,
 }: AnimatedResultsSequenceProps) {
@@ -91,6 +95,9 @@ export function AnimatedResultsSequence({
         <div style={{ width: '100%', marginTop: '2rem' }}>
           <SavingsCTA
             savings={savings}
+            optimizationResult={optimizationResult}
+            teamSize={teamSize}
+            selectedToolNames={selectedToolNames}
             onConsultationClick={onConsultationClick}
             onNotifyClick={onNotifyClick}
           />
@@ -99,3 +106,4 @@ export function AnimatedResultsSequence({
     </div>
   );
 }
+

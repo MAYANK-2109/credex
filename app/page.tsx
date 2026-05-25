@@ -841,6 +841,8 @@ export default function OptimizerPage() {
             <AnimatedResultsSequence
               optimizationResult={optimizationResult}
               savings={optimizationResult.totalMonthlySavings}
+              teamSize={teamSize}
+              selectedToolNames={selectedTools.map(t => t.toolName)}
               onConsultationClick={() => setLeadCaptureVisible(true)}
               onNotifyClick={() => setLeadCaptureVisible(true)}
             />

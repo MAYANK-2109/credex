@@ -280,6 +280,27 @@
   box-shadow: 0 10px 30px -10px var(--accent-purple);
 }
 
+.secondaryButton {
+  background: transparent;
+  color: var(--text-primary);
+  border: 2px solid var(--accent-primary);
+  border-radius: 8px;
+  padding: 0.875rem 1.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.secondaryButton:hover {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.secondaryButton:active {
+  transform: translateY(0);
+}
+
 .primaryButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 15px 40px -10px var(--accent-neon);
