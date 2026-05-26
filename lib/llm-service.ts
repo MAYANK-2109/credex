@@ -24,6 +24,14 @@ export async function generateOptimizationSummary(
     }
 
     const data = await response.json();
+    
+    if (!data.text || data.text.trim().length === 0) {
+      throw new Error('API returned empty text');
+    }
+    
+    console.log(`[LLM Service] Summary received: ${data.text.length} chars, source: ${data.source}`);
+    console.log(`[LLM Service] Full summary: ${data.text}`);
+    
     return {
       text: data.text,
       source: data.source || 'fallback',

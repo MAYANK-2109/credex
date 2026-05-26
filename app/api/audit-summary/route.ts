@@ -25,25 +25,26 @@ export async function POST(req: Request) {
   }
 
   // Create the core prompt for the Gemini model
-  const prompt = `
-Analyze this AI Spend Audit result for a startup team of ${teamSize} seats with a primary use case of "${primaryUseCase}".
-Here is the audit breakdown:
-- Total Current Spend: $${result.currentMonthlySpend || 0}/mo ($${result.currentAnnualSpend || 0}/yr)
-- Total Potential Savings: $${result.totalMonthlySavings || 0}/mo ($${result.totalAnnualSavings || 0}/yr)
-- Waste Score: ${result.wasteScore || 0}/100 (${result.wasteCategory || 'Unknown'})
-- Actionable Recommendations:
-${(result.recommendations || []).map((r: any) => `- ${r.toolName}: ${r.recommendedAction}. Savings: $${r.monthlySavings}/mo. Reason: ${r.reason}`).join('\n')}
+  const prompt = `Analyze this AI Spend Audit for a team of ${teamSize} using ${primaryUseCase} workflows.
 
-Provide a professional, high-impact, ~100-word executive summary of this audit. Address the startup founder directly with a formal, authoritative, yet encouraging tone. Detail the immediate action items to consolidate overlapping accounts and align seats to actual usage. Keep it concise, professional, and strictly under 120 words. Do not use Markdown headings or greeting lines.
-`;
+Current Spend: $${result.currentMonthlySpend || 0}/mo
+Potential Savings: $${result.totalMonthlySavings || 0}/mo
+Waste Score: ${result.wasteScore || 0}/100
+
+**Top Recommendations:**
+${(result.recommendations || []).slice(0, 5).map((r: any) => `- ${r.toolName}: ${r.recommendedAction} (Save $${r.monthlySavings}/mo)`).join('\n')}
+
+Provide a thorough, detailed executive summary. Address the founder directly. Include specific consolidation steps and financial impact. Be comprehensive and leave nothing out. With maximum response length of 100 words, prioritize the most impactful recommendations.`;
 
   try {
     // Call Gemini API with automatic retry logic
     const response = await callGeminiAPI(prompt, {
-      model: 'gemini-2.0-flash',
-      maxTokens: 300,
-      timeout: 10000,
+      model: 'gemini-2.5-flash',
+      maxTokens: 4000,
+      timeout: 30000,
     });
+
+    console.log(`[audit-summary] Full response received (${response.text.length} chars): ${response.text.substring(0, 200)}...`);
 
     // Return response with source indicator
     return NextResponse.json(

@@ -8,12 +8,12 @@
  *   node gemini-test.js
  */
 
-require('dotenv').config({ path: '.env.local' });
+require('dotenv').config({ path: '.env' });
 const https = require('https');
 
-// Read API key from .env.local environment variables
+// Read API key from root .env environment variables
 const API_KEY = process.env.GEMINI_API_KEY_PRIMARY || process.env.GEMINI_API_KEY_SECONDARY;
-const MODEL = 'gemini-2.0-flash';
+const MODEL = 'gemini-2.5-flash';
 
 if (!API_KEY) {
   console.error('❌ Error: GEMINI_API_KEY_PRIMARY or GEMINI_API_KEY_SECONDARY not found in .env.local');

@@ -120,7 +120,7 @@ export function AnimatedResultsSequence({
                     Gemini Live Summary Active ({summarySource} Channel)
                   </div>
                 )}
-                <p style={{ color: 'var(--text-primary)', lineHeight: 1.7, fontSize: '0.95rem', fontStyle: 'italic' }}>
+                <p style={{ color: 'var(--text-primary)', lineHeight: 1.7, fontSize: '0.95rem', fontStyle: 'italic', whiteSpace: 'pre-wrap', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                   {summary || "Run an audit above to generate your customized, AI-driven stack efficiency analysis."}
                 </p>
               </>

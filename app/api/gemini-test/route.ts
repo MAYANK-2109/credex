@@ -38,7 +38,7 @@ export async function GET() {
     console.log('Waiting for response...\n');
 
     const response = await callGeminiAPI(testPrompt, {
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       maxTokens: 50,
       timeout: 10000,
     });
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
     console.log(`Prompt: "${prompt}"\n`);
 
     const response = await callGeminiAPI(prompt, {
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       maxTokens: 500,
       timeout: 15000,
     });

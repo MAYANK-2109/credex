@@ -6,6 +6,10 @@
  *   console.log(response.text);
  */
 
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 interface GeminiResponse {
   text: string;
   source: 'primary' | 'secondary' | 'fallback';
@@ -26,7 +30,7 @@ export async function callGeminiAPI(
   }
 ): Promise<GeminiResponse> {
   const {
-    model = 'gemini-2.0-flash',
+    model = 'gemini-2.5-flash',
     maxTokens = 300,
     temperature = 1.0,
     timeout = 10000,
@@ -124,13 +128,28 @@ async function makeGeminiRequest(
       throw new Error(`Gemini API error: ${errorMsg}`);
     }
 
+    // Check finish reason to detect truncation
+    const finishReason = data.candidates?.[0]?.finishReason;
+    if (finishReason === 'MAX_TOKENS') {
+      console.warn('[Gemini API] ⚠️ Response truncated: MAX_TOKENS reached. Consider increasing maxOutputTokens.');
+    }
+    
+    // Log all available metadata
+    console.log('[Gemini API] Response metadata:', {
+      finishReason,
+      candidateCount: data.candidates?.length,
+      tokenCount: data.usageMetadata,
+    });
+
     // Extract generated text
     const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!generatedText) {
       throw new Error('No text in Gemini API response');
     }
 
-    console.log(`[Gemini API] Response received: ${generatedText.length} characters`);
+    console.log(`[Gemini API] ✅ Response received: ${generatedText.length} characters`);
+    console.log(`[Gemini API] First 300 chars: ${generatedText.substring(0, 300)}...`);
+    console.log(`[Gemini API] Last 300 chars: ...${generatedText.substring(Math.max(0, generatedText.length - 300))}`);
     return { text: generatedText.trim() };
   } catch (err: any) {
     clearTimeout(timeoutId);
@@ -152,7 +171,7 @@ export async function testGeminiConnection(): Promise<void> {
 
   try {
     const response = await callGeminiAPI(testPrompt, {
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       maxTokens: 100,
       timeout: 10000,
     });
