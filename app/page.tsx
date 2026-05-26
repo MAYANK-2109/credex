@@ -860,7 +860,7 @@ export default function OptimizerPage() {
                 setSummary('');
                 setSummarySource('');
               }}
-              className="fixed bottom-6 left-6 z-30 px-5 py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-light)] hover:border-[var(--border-glow)] text-[var(--text-primary)] text-sm font-bold shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5"
+              className="fixed bottom-6 left-6 z-30 px-5 py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-light)] hover:border-[var(--border-glow)] text-[var(--text-primary)] text-sm font-bold shadow-xl hover:scale-[1.02] active:scale-[0.96] transition-all flex items-center gap-1.5"
             >
               ← Back to Configuration
             </button>

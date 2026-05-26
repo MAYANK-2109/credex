@@ -104,40 +104,52 @@ Resend Transactional Email Onboarding:
 - Render clean Open Graph (OG) and Twitter Card tags in Next.js metadata templates to power rich social previews.
 ```
 
----
 
-FRONTEND OPTIMIZATION
+
 
 Recommendation Cards: Implement controlled-collapse pattern with card payload `{ toolName, currentPlan, currentAnnualSpend, recommendedPlan, projectedAnnualSpend, estimatedMonthlyRecovery, implementationComplexity, businessJustification, contractTerminationConstraints }`. Priority algorithm: savings (40%) + implementation effort (35%) + contract friction (25%) = 0-100 score. Hover state: `translateY(-4px)` with box-shadow transition. Expandable sections show payback period, logical rationale, and risk assessment with `max-height` animation (300ms, ease-in-out).
 
+
+
 Radial Progress Ring: AI Stack Waste Quotient = (sum monthly savings / total current spend) * 100. Color logic: green (0-20), yellow (21-50), red (51+). Mount animation uses cubic-bezier(0.34, 1.56, 0.64, 1). Real-time updates on card interactions.
+
+
 
 Ledger Comparison Table: Client-side sortable columns (Tool Name, Current Plan, Cost, Recommended Plan, Projected Cost, Monthly Savings, Annual Savings). Virtualization for 50+ rows maintaining 60fps. Row hover: `rgba(115, 66, 226, 0.08)` background.
 
-SOCIAL & SHARING
+
+
 
 Share URL Generation: Deterministic hash using `crypto.createHash('sha256')` from canonical tool config JSON, generating 8-character identifiers. Store in `data/shares.json` with metadata: `{ shareId, createdAt, expiresAt, viewCount, referralCount }`. URL format: `https://credex.app/share/[8-char-hash]`.
 
 Dynamic Metadata: OG image rendered as SVG with annual savings, recommendation count, waste quotient. Twitter Card type `summary_large_image` (1200x630px). Title: "Save $XXXX/year on AI tools", description highlights primary recommendation.
 
-BACKEND INFRASTRUCTURE
+
+
+
 
 Gemini API Resilience: Three-tier fallback cascade with 8-second timeout. Primary: `GEMINI_API_KEY_PRIMARY`. Secondary on failure: `GEMINI_API_KEY_SECONDARY` with exponential backoff (500ms initial, 1.5x multiplier, max 2 retries). Tertiary: Hardcoded template populated with audit data `{ toolCount, categoryCount, annualTotal, highPriorityCount, annualSavings, primaryRecommendation }`. Response includes source: 'primary' | 'secondary' | 'fallback'. UI displays fallback warning banner for transparency.
 
 Rate Limiting: Sliding-window per IP. Lead endpoint: 5 req/min. Audit-summary: 10 req/min. Implementation: timestamp buckets (minute-scoped), O(1) amortized. Reject with HTTP 429 + Retry-After header. Production: Redis-backed via Supabase.
 
+
+
+
 Security: Honeypot field `website` (display: none). Non-empty value silently discards payload. Catches 85-92% of bot submissions.
 
 Email Routing: If `estimatedMonthSavings >= $500`: high-value template with 24-hour specialist contact promise. Below $500: standard template with self-serve guidance.
 
-DATA LAYER
+
+
 
 Lead Storage: Primary Supabase table `leads` schema: `{ id (uuid), email, companyName, role, teamSize, primaryUseCase, toolCount, estimatedSavings, createdAt, submittedFrom }`. Connection pooling: 20 concurrent, 5min idle timeout. Fallback: `data/leads.json` append-only format. Background sync job every 15min with exponential backoff (max 3 retries per lead).
 
 Share Persistence: `data/shares.json` append-only structure indexed by 8-char hash (O(1) lookup). Tool config snapshot: `{ toolName, currentPlan, recommendedPlan, currentSpend, projectedSpend }`. Daily archive rotation. In-memory cache (Node.js Map) populated on startup.
 
-OBSERVABILITY
+
+
+
+
 
 Logging: Winston with JSON format. Levels: error (failures), warn (fallback/retry), info (submissions), debug (calc steps). Request ID correlation for end-to-end tracing. React error boundaries capture render exceptions.
-
 Performance: Track Core Web Vitals (LCP <2.5s, FID <100ms, CLS <0.1). Gemini TTFB monitoring across tiers. Ledger virtualization maintains 60fps on 100+ tools.
