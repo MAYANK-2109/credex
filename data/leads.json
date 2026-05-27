@@ -18,5 +18,15 @@
     "toolCount": 6,
     "savings": 6550,
     "timestamp": "2026-05-26T15:38:49.881Z"
+  },
+  {
+    "email": "test@example.com",
+    "companyName": "Acme",
+    "role": "Product",
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 2,
+    "savings": 0,
+    "timestamp": "2026-05-27T17:19:50.300Z"
   }
 ]
