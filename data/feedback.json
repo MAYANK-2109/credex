@@ -1,0 +1,51 @@
+[
+  {
+    "score": 4,
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 2,
+    "createdAt": "2026-05-22T18:50:50.553Z"
+  },
+  {
+    "score": 5,
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 2,
+    "createdAt": "2026-05-26T14:56:43.101Z"
+  },
+  {
+    "score": 4,
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 6,
+    "createdAt": "2026-05-26T15:31:08.588Z"
+  },
+  {
+    "score": 4,
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 6,
+    "createdAt": "2026-05-26T15:33:11.962Z"
+  },
+  {
+    "score": 3,
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 6,
+    "createdAt": "2026-05-26T15:38:53.634Z"
+  },
+  {
+    "score": 4,
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 5,
+    "createdAt": "2026-05-26T15:43:41.192Z"
+  },
+  {
+    "score": 4,
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 5,
+    "createdAt": "2026-05-26T20:04:56.006Z"
+  }
+]

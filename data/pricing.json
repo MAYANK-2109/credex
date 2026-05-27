@@ -1,0 +1,38 @@
+{
+  "Cursor": {
+    "Hobby": { "flatPrice": 35 },
+    "Pro": { "seatPrice": 20 },
+    "Business": { "seatPrice": 18, "minSeats": 10 },
+    "Enterprise": { "seatPrice": 16, "minSeats": 25 }
+  },
+  "GitHub Copilot": {
+    "Individual": { "flatPrice": 10 },
+    "Business": {
+      "seatPrice": 19,
+      "volumeDiscounts": [{ "minSeats": 50, "seatPrice": 15 }]
+    },
+    "Enterprise": {
+      "seatPrice": 21,
+      "volumeDiscounts": [{ "minSeats": 50, "seatPrice": 18 }]
+    }
+  },
+  "Claude": {
+    "Free": { "flatPrice": 0 },
+    "Pro": { "seatPrice": 20 },
+    "Max": { "seatPrice": 35 },
+    "Team": { "seatPrice": 24, "minSeats": 5 },
+    "Enterprise": { "seatPrice": 35 },
+    "APIdirect": {}
+  },
+  "ChatGPT": {
+    "Plus": { "flatPrice": 20 },
+    "Team": { "seatPrice": 20, "minPrice": 200 },
+    "Enterprise": { "seatPrice": 30 },
+    "APIdirect": {}
+  },
+  "Gemini": {
+    "Pro": { "seatPrice": 25 },
+    "Ultra": { "seatPrice": 45 },
+    "API": {}
+  }
+}
