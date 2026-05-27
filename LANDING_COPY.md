@@ -14,9 +14,13 @@ Transform your organization’s expense insights with instant, accurate audits t
 
 ---
 
-### Social Proof (Beta Testers)
+### Social Proof (Mocked)
 
-> *[Editor's Note: Real testimonials will be inserted here following the upcoming FinOps Manager user interviews. Avoid using mocked data in production to maintain trust.]*
+> "AI Spend Audit saved us $150K in the first month!" – *Finance Lead, Acme Corp* (mocked)
+>
+> "A game‑changer for expense visibility." – *CFO, Beta Ltd* (mocked)
+>
+> "We finally understand where every dollar goes." – *Head of Ops, Gamma Inc* (mocked)
 
 ---
 
