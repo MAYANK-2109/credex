@@ -70,7 +70,7 @@ export function AnimatedResultsSequence({
               <Activity className="w-5 h-5 text-[var(--accent-primary)] animate-pulse" />
               AI Personalized Stack Analysis
             </h3>
-            
+
             {isSummaryLoading ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', gap: '1rem' }}>
                 <Loader2 className="w-8 h-8 text-[var(--accent-primary)] animate-spin" />

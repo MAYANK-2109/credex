@@ -57,9 +57,9 @@ export function UseCaseSelect({ value, onChange }: UseCaseSelectProps) {
             </option>
           ))}
         </select>
-        <ChevronDown 
-          style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-secondary)' }} 
-          size={16} 
+        <ChevronDown
+          style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-secondary)' }}
+          size={16}
         />
       </div>
     </div>
@@ -95,7 +95,7 @@ export function ToolGrid({ selectedTools, onAdd, onRemove, onUpdate }: ToolGridP
   return (
     <div>
       <div className={styles.label} style={{ marginBottom: '1rem' }}>Active Tools & Plans</div>
-      
+
       {/* Available tools grid */}
       <div className={styles.toolGrid}>
         {TOOL_OPTIONS.map((tool) => {

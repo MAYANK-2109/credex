@@ -343,7 +343,7 @@ export default function OptimizerPage() {
 
   return (
     <div className="dot-grid min-h-screen relative pb-12 transition-colors duration-300 bg-[var(--bg-primary)]">
-      
+
       {/* Background Animated Gradient Blobs */}
       <div className="mesh-gradient-container">
         <div className="mesh-blob animate-float-slow bg-cyan-500 w-[500px] h-[500px] top-[-100px] right-[-100px] rounded-full"></div>
@@ -366,9 +366,9 @@ export default function OptimizerPage() {
             <a href="#calculator" className="hidden md:inline text-sm font-medium text-gray-300 hover:text-white transition-colors">Savings Estimator</a>
             <a href="#features" className="hidden md:inline text-sm font-medium text-gray-300 hover:text-white transition-colors">Features</a>
             <a href="#audit-tool" className="text-sm font-semibold px-5 py-2 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Start Audit</a>
-            
+
             {/* Smart Theme Switcher Switch */}
-            <button 
+            <button
               onClick={toggleTheme}
               className="w-10 h-10 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 flex items-center justify-center text-white shadow-sm hover:scale-[1.05] active:scale-[0.95] transition-all"
               aria-label="Toggle light/dark theme"
@@ -381,72 +381,72 @@ export default function OptimizerPage() {
 
       {/* Main Page Layout */}
       <div className="w-full max-w-6xl mx-auto px-6 relative z-10 pt-12">
-        
+
         {!hasCalculated ? (
           <>
             {/* HERO SECTION */}
             <header className="relative w-screen h-screen min-h-[600px] mb-24 overflow-hidden left-1/2 -translate-x-1/2">
-               {/* Video Background */}
-               <video 
-                 autoPlay 
-                 loop 
-                 muted 
-                 playsInline 
-                 className="absolute inset-0 w-full h-full object-cover"
-               >
-                 <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260518_003132_8b7edcb6-c64d-4a52-a9ca-879942e122ad.mp4" type="video/mp4" />
-               </video>
-               
-               {/* Overlay (optional, depending on the video's brightness; kept very subtle) */}
-               <div className="absolute inset-0 bg-white/20"></div>
-               
-               {/* Content - Positioned Middle Left */}
-               <div className="absolute top-1/2 -translate-y-1/2 left-6 md:left-20 lg:left-32 z-10 flex flex-col items-start text-left max-w-2xl w-[90%] md:w-auto">
-                 
-                 {/* Text Content Container (No background) */}
-                 <div className="w-full">
-                   {/* Pulsing Active Audits Badge */}
-                   <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-login-bg)] border border-[var(--color-accent)]/20 text-xs font-semibold text-[var(--color-text)] shadow-sm">
-                     <span className="w-2 h-2 rounded-full bg-[var(--color-accent)] animate-pulse"></span>
-                     <span>{statCounter.toLocaleString()} AI Audits Completed Globally</span>
-                   </div>
+              {/* Video Background */}
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+              >
+                <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260518_003132_8b7edcb6-c64d-4a52-a9ca-879942e122ad.mp4" type="video/mp4" />
+              </video>
 
-                   {/* Headline */}
-                   <h1 className="font-extrabold text-4xl md:text-6xl tracking-tight leading-[1.1] mb-6 font-display text-[var(--color-text)]">
-                     Stop Wasting Money on <br />
-                     <span className="font-black">Over-Allocated AI Plans</span>
-                   </h1>
-                   
-                   <p className="text-base md:text-xl text-[var(--color-text)]/80 leading-relaxed mb-10 font-normal">
-                     Instantly scan your team's AI subscriptions, expose redundant seat allocations, and consolidate into optimized tiers. Completely free, founder-grade audit.
-                   </p>
+              {/* Overlay (optional, depending on the video's brightness; kept very subtle) */}
+              <div className="absolute inset-0 bg-white/20"></div>
 
-                   {/* Action Buttons */}
-                   <div className="flex flex-col sm:flex-row gap-4 justify-start">
-                     <a 
-                       href="#calculator" 
-                       className="px-8 py-4 rounded-full bg-white/80 hover:bg-white border border-[var(--color-text)]/10 text-[var(--color-text)] font-bold text-base text-center transition-all flex items-center justify-center shadow-sm"
-                     >
-                       Quick Estimator
-                     </a>
-                     <a 
-                       href="#audit-tool" 
-                       className="px-8 py-4 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 text-white font-bold text-base text-center shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                     >
-                       Run Custom Stack Audit <ArrowRight className="w-4 h-4" />
-                     </a>
-                   </div>
-                 </div>
-               </div>
+              {/* Content - Positioned Middle Left */}
+              <div className="absolute top-1/2 -translate-y-1/2 left-6 md:left-20 lg:left-32 z-10 flex flex-col items-start text-left max-w-2xl w-[90%] md:w-auto">
+
+                {/* Text Content Container (No background) */}
+                <div className="w-full">
+                  {/* Pulsing Active Audits Badge */}
+                  <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-login-bg)] border border-[var(--color-accent)]/20 text-xs font-semibold text-[var(--color-text)] shadow-sm">
+                    <span className="w-2 h-2 rounded-full bg-[var(--color-accent)] animate-pulse"></span>
+                    <span>{statCounter.toLocaleString()} AI Audits Completed Globally</span>
+                  </div>
+
+                  {/* Headline */}
+                  <h1 className="font-extrabold text-4xl md:text-6xl tracking-tight leading-[1.1] mb-6 font-display text-[var(--color-text)]">
+                    Stop Wasting Money on <br />
+                    <span className="font-black">Over-Allocated AI Plans</span>
+                  </h1>
+
+                  <p className="text-base md:text-xl text-[var(--color-text)]/80 leading-relaxed mb-10 font-normal">
+                    Instantly scan your team's AI subscriptions, expose redundant seat allocations, and consolidate into optimized tiers. Completely free, founder-grade audit.
+                  </p>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4 justify-start">
+                    <a
+                      href="#calculator"
+                      className="px-8 py-4 rounded-full bg-white/80 hover:bg-white border border-[var(--color-text)]/10 text-[var(--color-text)] font-bold text-base text-center transition-all flex items-center justify-center shadow-sm"
+                    >
+                      Quick Estimator
+                    </a>
+                    <a
+                      href="#audit-tool"
+                      className="px-8 py-4 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 text-white font-bold text-base text-center shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    >
+                      Run Custom Stack Audit <ArrowRight className="w-4 h-4" />
+                    </a>
+                  </div>
+                </div>
+              </div>
             </header>
 
             {/* QUICK ESTIMATOR / SAVINGS CALCULATOR */}
             <section id="calculator" className="scroll-mt-24 mb-24 max-w-4xl mx-auto">
               <div className="glass-panel p-8 md:p-12 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-cyan-500 to-emerald-500"></div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-                  
+
                   {/* Sliders Area (left 7 cols) */}
                   <div className="md:col-span-7 flex flex-col gap-6">
                     <div>
@@ -463,11 +463,11 @@ export default function OptimizerPage() {
                         <span>Current Monthly AI Spend</span>
                         <span className="text-[var(--accent-neon)]">${calcSpend.toLocaleString()}/mo</span>
                       </div>
-                      <input 
-                        type="range" 
-                        min="50" 
-                        max="10000" 
-                        step="50" 
+                      <input
+                        type="range"
+                        min="50"
+                        max="10000"
+                        step="50"
                         value={calcSpend}
                         onChange={(e) => setCalcSpend(Number(e.target.value))}
                         className="w-full accent-cyan-500 bg-[var(--border-light)] h-2 rounded-lg cursor-pointer"
@@ -485,10 +485,10 @@ export default function OptimizerPage() {
                         <span>Total AI Users (Seats)</span>
                         <span className="text-[var(--accent-primary)]">{calcTeam} Seats</span>
                       </div>
-                      <input 
-                        type="range" 
-                        min="1" 
-                        max="150" 
+                      <input
+                        type="range"
+                        min="1"
+                        max="150"
                         value={calcTeam}
                         onChange={(e) => setCalcTeam(Number(e.target.value))}
                         className="w-full accent-emerald-500 bg-[var(--border-light)] h-2 rounded-lg cursor-pointer"
@@ -504,7 +504,7 @@ export default function OptimizerPage() {
                   {/* Calculations Result Block (right 5 cols) */}
                   <div className="md:col-span-5 p-6 rounded-2xl bg-indigo-950/20 border border-indigo-500/10 flex flex-col items-center text-center justify-center relative overflow-hidden group">
                     <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 via-transparent to-transparent pointer-events-none"></div>
-                    
+
                     <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-2">Estimated Monthly Salvage</span>
                     <span className="text-5xl font-black tracking-tight text-[var(--accent-primary)] font-display mb-2 drop-shadow-md">
                       ${displayedSavings.toLocaleString()}
@@ -532,7 +532,7 @@ export default function OptimizerPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
+
                 {/* Card 1: Analyze */}
                 <div className="glass-panel p-8 flex flex-col justify-between group hover:translate-y-[-4px]">
                   <div>
@@ -586,7 +586,7 @@ export default function OptimizerPage() {
 
             {/* INTERACTIVE COMPARISON TABLE & RISK RADIAL PROGRESS */}
             <section className="mb-24 max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              
+
               {/* Cost Comparison Table (left 7 cols) */}
               <div className="glass-panel p-6 md:p-8 lg:col-span-7 flex flex-col gap-6">
                 <div>
@@ -596,7 +596,7 @@ export default function OptimizerPage() {
                   </h3>
                   <p className="text-xs text-[var(--text-secondary)] mt-1">Compare AI tool subscription fees instantly. Click column headers to sort values.</p>
                 </div>
-                
+
                 <div className="overflow-x-auto w-full">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
@@ -637,14 +637,14 @@ export default function OptimizerPage() {
                   {/* SVG radial progress */}
                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
                     <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border-light)" strokeWidth="8" />
-                    <circle 
-                      cx="60" 
-                      cy="60" 
-                      r="50" 
-                      fill="none" 
-                      stroke="url(#radial-grad)" 
-                      strokeWidth="9" 
-                      strokeDasharray={2 * Math.PI * 50} 
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="50"
+                      fill="none"
+                      stroke="url(#radial-grad)"
+                      strokeWidth="9"
+                      strokeDasharray={2 * Math.PI * 50}
                       strokeDashoffset={2 * Math.PI * 50 * (1 - 0.74)}
                       strokeLinecap="round"
                     />
@@ -679,7 +679,7 @@ export default function OptimizerPage() {
 
               <div className="glass-panel p-6 md:p-10 relative">
                 <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-emerald-500 to-indigo-500"></div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <TeamSizeInput value={teamSize} onChange={setTeamSize} />
                   <UseCaseSelect value={primaryUseCase} onChange={setPrimaryUseCase} />
@@ -711,7 +711,7 @@ export default function OptimizerPage() {
               </div>
 
               <div className="relative border-l border-[var(--border-light)] ml-4 md:ml-8 pl-8 flex flex-col gap-12">
-                
+
                 {/* Step 1 */}
                 <div className="relative">
                   <div className="absolute -left-12 top-0.5 w-8 h-8 rounded-full bg-[var(--bg-primary)] border border-cyan-500 flex items-center justify-center text-xs font-bold text-cyan-400 shadow-sm shadow-cyan-500/20">
@@ -756,7 +756,7 @@ export default function OptimizerPage() {
                     <>
                       {/* Video Thumbnail Frame */}
                       <div className="absolute inset-0 bg-gradient-to-tr from-cyan-950/30 to-indigo-950/20 flex flex-col items-center justify-center p-6 text-center select-none z-10">
-                        <button 
+                        <button
                           onClick={() => setIsVideoPlaying(true)}
                           className="w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-500 to-cyan-500 hover:scale-[1.1] active:scale-[0.95] text-white flex items-center justify-center shadow-2xl shadow-emerald-500/30 transition-all cursor-pointer group/btn mb-6"
                           aria-label="Play explainer video"
@@ -795,7 +795,7 @@ export default function OptimizerPage() {
                 <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                   <Sparkles className="w-24 h-24 text-[var(--text-primary)]" />
                 </div>
-                
+
                 {/* Active Testimonial Quote */}
                 <div className="transition-all duration-300">
                   <p className="text-base md:text-lg italic text-[var(--text-primary)] font-medium leading-relaxed mb-6">
@@ -814,7 +814,7 @@ export default function OptimizerPage() {
 
                 {/* Slide Controls */}
                 <div className="flex items-center justify-end gap-3 mt-6 border-t border-[var(--border-light)] pt-4">
-                  <button 
+                  <button
                     onClick={() => setActiveTestimonial((prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)}
                     className="w-8 h-8 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-light)] hover:border-[var(--border-glow)] flex items-center justify-center text-[var(--text-primary)] transition-all"
                     aria-label="Previous testimonial"
@@ -824,7 +824,7 @@ export default function OptimizerPage() {
                   <span className="text-[10px] font-bold text-[var(--text-secondary)]">
                     {activeTestimonial + 1} / {TESTIMONIALS.length}
                   </span>
-                  <button 
+                  <button
                     onClick={() => setActiveTestimonial((prev) => (prev + 1) % TESTIMONIALS.length)}
                     className="w-8 h-8 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-light)] hover:border-[var(--border-glow)] flex items-center justify-center text-[var(--text-primary)] transition-all"
                     aria-label="Next testimonial"
@@ -840,7 +840,7 @@ export default function OptimizerPage() {
         {/* RESULTS SECTION: ANIMATED SEQUENCE AND BACK CONTROLS */}
         {hasCalculated && optimizationResult ? (
           <div id="results-section" className="scroll-mt-6">
-            
+
             {/* ANIMATED RESULTS SEQUENCE */}
             <AnimatedResultsSequence
               optimizationResult={optimizationResult}
@@ -870,7 +870,7 @@ export default function OptimizerPage() {
               <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-pulse-slow" style={{ animationDuration: '8s' }}>
                 <div className="glass-panel p-8 md:p-10 w-full max-w-lg relative">
                   <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-cyan-500 to-indigo-500"></div>
-                  
+
                   <h3 className="text-2xl font-bold font-display text-[var(--text-primary)] mb-2">
                     {optimizationResult.totalMonthlySavings > 500 ? '🚀 Capture Organizations Savings' : '🔔 Stay Spend-Optimized'}
                   </h3>
@@ -903,7 +903,7 @@ export default function OptimizerPage() {
       {/* INNOVATIVE FOOTER */}
       <footer className="w-full max-w-6xl mx-auto border-t border-[var(--border-light)] mt-24 pt-12 px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12">
-          
+
           {/* Copyright Vibe */}
           <div className="md:col-span-5 flex flex-col gap-4">
             <div className="flex items-center gap-2">
@@ -934,20 +934,20 @@ export default function OptimizerPage() {
           <div className="md:col-span-4 flex flex-col gap-4">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">Capture Optimization Alerts</h4>
             <p className="text-xs text-[var(--text-secondary)]">Get quarterly bulletins with updated developer API rates and pricing strategies.</p>
-            
+
             {!newsletterSubscribed ? (
               <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
-                <input 
-                  type="email" 
-                  placeholder="Enter email address" 
+                <input
+                  type="email"
+                  placeholder="Enter email address"
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   className="flex-1 bg-[var(--bg-secondary)] border border-[var(--border-light)] focus:border-[var(--border-glow)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none transition-colors"
                   required
                   aria-label="Newsletter email address"
                 />
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-indigo-500 hover:scale-[1.03] active:scale-[0.97] rounded-xl text-xs font-bold text-white shadow transition-all"
                 >
                   Join

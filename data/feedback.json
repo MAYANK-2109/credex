@@ -40,5 +40,12 @@
     "primaryUseCase": "coding",
     "toolCount": 5,
     "createdAt": "2026-05-26T15:43:41.192Z"
+  },
+  {
+    "score": 4,
+    "teamSize": 5,
+    "primaryUseCase": "coding",
+    "toolCount": 5,
+    "createdAt": "2026-05-26T20:04:56.006Z"
   }
 ]

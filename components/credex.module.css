@@ -1205,3 +1205,186 @@
     padding: 0.6rem 0.75rem;
   }
 }
+
+/* ============================================================================
+   LEAD CAPTURE FORM — Formal & Minimal
+   ============================================================================ */
+
+.leadForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.leadFieldGroup {
+  margin-bottom: 1.125rem;
+}
+
+.leadFieldLabel {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.leadOptional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+}
+
+.leadInput {
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 0.625rem 0.875rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  outline: none;
+  min-height: 42px;
+}
+
+.leadInput::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.leadInput:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.08);
+}
+
+/* Icon-decorated input wrapper */
+.leadInputIcon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.leadInputIconSvg {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--text-secondary);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.leadInputWithIcon {
+  padding-left: 2.25rem;
+}
+
+/* Star rating */
+.starRow {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.starBtn {
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  line-height: 0;
+  transition: transform 0.12s ease;
+}
+
+.starBtn:hover {
+  transform: scale(1.15);
+}
+
+.starIcon {
+  width: 28px;
+  height: 28px;
+  transition: color 0.12s ease;
+}
+
+.starFilled {
+  color: #f59e0b;
+}
+
+.starEmpty {
+  color: var(--border-light);
+}
+
+.starMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.25rem;
+}
+
+.starCount {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.viewBreakdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.viewBreakdown:hover {
+  color: var(--text-primary);
+}
+
+/* Submit button */
+.leadSubmitBtn {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #06b6d4 0%, #10b981 100%);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: opacity 0.18s ease, transform 0.15s ease, box-shadow 0.18s ease;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.25);
+  margin-top: 0.5rem;
+  min-height: 46px;
+}
+
+.leadSubmitBtn:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.32);
+}
+
+.leadSubmitBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.leadSubmitBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Error message */
+.leadError {
+  font-size: 0.8rem;
+  color: var(--accent-pink);
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
