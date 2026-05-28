@@ -19,7 +19,8 @@ import {
   Check,
   Play,
   ArrowRightLeft,
-  ChevronDown
+  ChevronDown,
+  BarChart2
 } from 'lucide-react';
 import {
   TeamSizeInput,
@@ -867,18 +868,23 @@ export default function OptimizerPage() {
 
             {/* Detailed Lead Capture Modal */}
             {leadCaptureVisible && (
-              <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-pulse-slow" style={{ animationDuration: '8s' }}>
+              <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
                 <div className="glass-panel p-8 md:p-10 w-full max-w-lg relative">
                   <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-cyan-500 to-indigo-500"></div>
 
-                  <h3 className="text-2xl font-bold font-display text-[var(--text-primary)] mb-2">
-                    {optimizationResult.totalMonthlySavings > 500 ? '🚀 Capture Organizations Savings' : '🔔 Stay Spend-Optimized'}
-                  </h3>
-                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6">
-                    {optimizationResult.totalMonthlySavings > 500
-                      ? 'Submit your details to book a consultation and download exact cost optimization blueprints.'
-                      : 'Get alerted instantly whenever new tool discounts or credit consolidation brackets become active.'}
-                  </p>
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-5 mb-6 flex gap-4 items-start shadow-sm border border-[var(--border-light)]">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <BarChart2 className="w-6 h-6 text-slate-700 dark:text-slate-300" />
+                    </div>
+                    <div>
+                      <h3 className="text-[1.1rem] font-bold text-slate-900 dark:text-white mb-1.5 leading-tight font-display">
+                        Audit Feedback & Savings Guide
+                      </h3>
+                      <p className="text-[0.9rem] text-slate-600 dark:text-slate-400 leading-snug">
+                        Submit your details for a tailored cost optimization blueprint and a complementary expert consultation.
+                      </p>
+                    </div>
+                  </div>
 
                   <LeadCaptureForm
                     onSubmit={handleLeadSubmit}

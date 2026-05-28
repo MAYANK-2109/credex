@@ -10,11 +10,15 @@ A lightweight, AI‑powered tool that scans your development‑tool spend, ident
 
 | Screenshot | Description |
 |---|---|
-| ![Dashboard](https://example.com/images/dashboard.png) | Main audit dashboard showing spend breakdown and waste score |
-| ![Recommendations](https://example.com/images/recommendations.png) | Optimized tool recommendations with pay‑back calculations |
-| ![Report Export](https://example.com/images/report.png) | Exported PDF report summary |
+| ![Dashboard](./img%201.png) | Landing + audit setup view (shows tool spend inputs and waste score preview) |
+| ![Recommendations](./img%202.png) | Recommendations page (pricing fit + suggested plan changes) |
+| ![Report Export](./img3.png) | PDF report export preview/summary layout |
+| ![Share Link](./img%204.png) | Share flow using the generated `/share/[id]` link |
+| ![Lead Capture](./img%205.png) | Consultation + lead capture form used to follow up |
+| ![Landing](./img%206.png) | Marketing landing section explaining the audit value |
 
 **30‑second walkthrough**: [Loom video](https://loom.com/share/placeholder)
+
 
 ---
 

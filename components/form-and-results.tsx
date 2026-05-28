@@ -463,13 +463,39 @@ export function SavingsCTA({ savings, optimizationResult, teamSize, selectedTool
   onConsultationClick: () => void;
   onNotifyClick: () => void;
 }) {
-  // Handler to copy current page URL to clipboard
+  // Handler to share the current tool configuration via /api/shares
   const handleShare = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      const toolsPayload: ToolConfig[] = optimizationResult?.tools
+        ? optimizationResult.tools
+        : selectedToolNames.map((toolName) => ({
+            toolId: toolName.toLowerCase().replace(/\s+/g, '-'),
+            toolName,
+            plan: 'Pro',
+            monthlySpend: 0,
+            seats: 1,
+          }));
+
+      const res = await fetch('/api/shares', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tools: toolsPayload }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Share request failed: ${res.status}`);
+      }
+
+      const data = (await res.json()) as { id?: string };
+      if (!data?.id) {
+        throw new Error('Share id missing from response');
+      }
+
+      const shareUrl = new URL(`/share/${data.id}`, window.location.origin).toString();
+      await navigator.clipboard.writeText(shareUrl);
       alert('Result URL copied to clipboard!');
     } catch (err) {
-      console.error('Copy failed', err);
+      console.error('Share failed', err);
     }
   };
 
@@ -546,6 +572,44 @@ export interface LeadCaptureData {
   honeypot: string;
 }
 
+/* Star Rating Sub-Component */
+function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const [hovered, setHovered] = React.useState<number | null>(null);
+  const display = hovered ?? value;
+
+  return (
+    <div style={{ display: 'flex', gap: '0.25rem', cursor: 'pointer' }} role="radiogroup" aria-label="Rating">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          onClick={() => onChange(star)}
+          onMouseEnter={() => setHovered(star)}
+          onMouseLeave={() => setHovered(null)}
+          aria-label={`${star} star${star > 1 ? 's' : ''}`}
+          role="radio"
+          aria-checked={value === star}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '2px',
+            cursor: 'pointer',
+            fontSize: '2rem',
+            lineHeight: 1,
+            transition: 'transform 0.15s ease',
+            transform: hovered === star ? 'scale(1.2)' : 'scale(1)',
+            filter: star <= display
+              ? 'drop-shadow(0 1px 2px rgba(234,179,8,0.4))'
+              : 'none',
+          }}
+        >
+          {star <= display ? '⭐' : '☆'}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function LeadCaptureForm({ onSubmit, isLoading, errorMessage }: {
   onSubmit: (data: LeadCaptureData) => void;
   isLoading: boolean;
@@ -558,6 +622,7 @@ export function LeadCaptureForm({ onSubmit, isLoading, errorMessage }: {
     rating: 4,
     honeypot: '',
   });
+  const [showBreakdown, setShowBreakdown] = React.useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -568,59 +633,140 @@ export function LeadCaptureForm({ onSubmit, isLoading, errorMessage }: {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className={styles.formGroup}>
-        <label htmlFor="audit-rating" className={styles.label} style={{ marginBottom: '0.5rem' }}>
+      {/* Star Rating Section */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <label
+          className={styles.label}
+          style={{
+            marginBottom: '0.75rem',
+            display: 'block',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            fontWeight: 800,
+            fontSize: '0.8rem',
+          }}
+        >
           How useful was this audit?
         </label>
-        <select
-          id="audit-rating"
+        <StarRating
           value={formData.rating}
-          onChange={(e) => setFormData({ ...formData, rating: Number(e.target.value) })}
-          className={styles.input}
-          style={{ appearance: 'none' }}
-        >
-          {[5, 4, 3, 2, 1].map((score) => (
-            <option key={score} value={score}>
-              {score} / 5
-            </option>
-          ))}
-        </select>
+          onChange={(v) => setFormData({ ...formData, rating: v })}
+        />
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: '0.5rem',
+        }}>
+          <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+            {formData.rating} / 5 Stars
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowBreakdown(!showBreakdown)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              padding: 0,
+              transition: 'color 0.2s ease',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18" /><path d="M9 21V9" /></svg>
+            View Detailed Breakdown
+          </button>
+        </div>
+
+        {/* Optional breakdown tooltip */}
+        {showBreakdown && (
+          <div style={{
+            marginTop: '0.75rem',
+            padding: '0.75rem 1rem',
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-light)',
+            borderRadius: '0.75rem',
+            fontSize: '0.8rem',
+            color: 'var(--text-secondary)',
+            lineHeight: 1.6,
+          }}>
+            Your rating helps us improve the audit engine. Detailed feedback breakdown is included in the optimization blueprint sent after submission.
+          </div>
+        )}
       </div>
 
+      {/* Role Field */}
       <div className={styles.formGroup}>
+        <label htmlFor="role" className={styles.label} style={{ fontWeight: 700, marginBottom: '0.4rem' }}>
+          Role <span style={{ fontWeight: 400, color: 'var(--text-secondary)' }}>(Optional)</span>
+        </label>
         <input
           id="role"
           type="text"
-          placeholder="Role (Optional)"
+          placeholder="e.g. CTO, Finance Manager"
           value={formData.role}
           onChange={(e) => setFormData({ ...formData, role: e.target.value })}
           className={styles.input}
           aria-label="Role"
         />
       </div>
+
+      {/* Email Field */}
       <div className={styles.formGroup}>
-        <input
-          id="email"
-          type="email"
-          placeholder="Email Address"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          required
-          className={styles.input}
-          aria-label="Email Address"
-        />
+        <label htmlFor="email" className={styles.label} style={{ fontWeight: 700, marginBottom: '0.4rem' }}>
+          Email Address
+        </label>
+        <div style={{ position: 'relative' }}>
+          <div style={{
+            position: 'absolute',
+            left: '0.875rem',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: 'var(--text-secondary)',
+            pointerEvents: 'none',
+            display: 'flex',
+            alignItems: 'center',
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+          </div>
+          <input
+            id="email"
+            type="email"
+            placeholder="name@company.com"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            required
+            className={styles.input}
+            style={{ paddingLeft: '2.75rem' }}
+            aria-label="Email Address"
+          />
+        </div>
       </div>
+
+      {/* Company Name Field */}
       <div className={styles.formGroup}>
+        <label htmlFor="company" className={styles.label} style={{ fontWeight: 700, marginBottom: '0.4rem' }}>
+          Company Name <span style={{ fontWeight: 400, color: 'var(--text-secondary)' }}>(Optional)</span>
+        </label>
         <input
           id="company"
           type="text"
-          placeholder="Company Name (Optional)"
+          placeholder="e.g. Acme Corp"
           value={formData.companyName}
           onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
           className={styles.input}
           aria-label="Company Name"
         />
       </div>
+
+      {/* Honeypot */}
       <input
         type="text"
         name="website"
@@ -629,9 +775,45 @@ export function LeadCaptureForm({ onSubmit, isLoading, errorMessage }: {
         onChange={(e) => setFormData({ ...formData, honeypot: e.target.value })}
         tabIndex={-1}
       />
-      {errorMessage && <p style={{ color: 'var(--accent-pink)', fontSize: '0.875rem', marginBottom: '1rem' }}>{errorMessage}</p>}
-      <button type="submit" disabled={isLoading} className={styles.primaryButton}>
-        {isLoading ? 'Submitting...' : 'Submit'}
+
+      {errorMessage && (
+        <p style={{ color: 'var(--accent-pink)', fontSize: '0.875rem', marginBottom: '1rem' }}>
+          {errorMessage}
+        </p>
+      )}
+
+      {/* Submit Button — cyan-to-blue gradient matching screenshot */}
+      <button
+        type="submit"
+        disabled={isLoading}
+        style={{
+          width: '100%',
+          background: 'linear-gradient(135deg, #00b4d8, #0077b6)',
+          color: 'white',
+          border: 'none',
+          borderRadius: '14px',
+          padding: '1rem',
+          fontSize: '1.05rem',
+          fontWeight: 700,
+          cursor: isLoading ? 'wait' : 'pointer',
+          transition: 'all 0.25s ease',
+          boxShadow: '0 6px 24px -4px rgba(0, 119, 182, 0.35)',
+          minHeight: '52px',
+          opacity: isLoading ? 0.7 : 1,
+          letterSpacing: '0.01em',
+        }}
+        onMouseEnter={(e) => {
+          if (!isLoading) {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 10px 32px -4px rgba(0, 119, 182, 0.45)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 6px 24px -4px rgba(0, 119, 182, 0.35)';
+        }}
+      >
+        {isLoading ? 'Submitting...' : 'Submit & Book Consultation'}
       </button>
     </form>
   );

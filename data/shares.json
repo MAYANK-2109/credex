@@ -18,5 +18,87 @@
     "id": "84c1dfe5",
     "tools": [],
     "createdAt": "2026-05-27T18:26:02.754Z"
+  },
+  {
+    "id": "dd64529b",
+    "tools": [
+      {
+        "toolId": "github-copilot",
+        "toolName": "GitHub Copilot",
+        "plan": "Pro",
+        "monthlySpend": 0,
+        "seats": 1
+      },
+      {
+        "toolId": "chatgpt",
+        "toolName": "ChatGPT",
+        "plan": "Pro",
+        "monthlySpend": 0,
+        "seats": 1
+      },
+      {
+        "toolId": "claude",
+        "toolName": "Claude",
+        "plan": "Pro",
+        "monthlySpend": 0,
+        "seats": 1
+      },
+      {
+        "toolId": "windsurf",
+        "toolName": "Windsurf",
+        "plan": "Pro",
+        "monthlySpend": 0,
+        "seats": 1
+      },
+      {
+        "toolId": "v0",
+        "toolName": "v0",
+        "plan": "Pro",
+        "monthlySpend": 0,
+        "seats": 1
+      }
+    ],
+    "createdAt": "2026-05-28T09:36:30.633Z"
+  },
+  {
+    "id": "631bcc56",
+    "tools": [
+      {
+        "toolId": "github-copilot",
+        "toolName": "GitHub Copilot",
+        "plan": "Pro",
+        "monthlySpend": 0,
+        "seats": 1
+      },
+      {
+        "toolId": "chatgpt",
+        "toolName": "ChatGPT",
+        "plan": "Pro",
+        "monthlySpend": 0,
+        "seats": 1
+      },
+      {
+        "toolId": "claude",
+        "toolName": "Claude",
+        "plan": "Pro",
+        "monthlySpend": 0,
+        "seats": 1
+      },
+      {
+        "toolId": "windsurf",
+        "toolName": "Windsurf",
+        "plan": "Pro",
+        "monthlySpend": 0,
+        "seats": 1
+      },
+      {
+        "toolId": "v0",
+        "toolName": "v0",
+        "plan": "Pro",
+        "monthlySpend": 0,
+        "seats": 1
+      }
+    ],
+    "createdAt": "2026-05-28T09:43:56.715Z"
   }
 ]
