@@ -10,12 +10,13 @@ A lightweight, AI‑powered tool that scans your development‑tool spend, ident
 
 | Screenshot | Description |
 |---|---|
-| ![Dashboard](./img%201.png) | Landing + audit setup view (shows tool spend inputs and waste score preview) |
-| ![Recommendations](./img%202.png) | Recommendations page (pricing fit + suggested plan changes) |
-| ![Report Export](./img3.png) | PDF report export preview/summary layout |
-| ![Share Link](./img%204.png) | Share flow using the generated `/share/[id]` link |
-| ![Lead Capture](./img%205.png) | Consultation + lead capture form used to follow up |
-| ![Landing](./img%206.png) | Marketing landing section explaining the audit value |
+| ![Dashboard](./image%201.png) | Landing + audit setup view (shows tool spend inputs and waste score preview) |
+| ![Recommendations](./image%202.png) | Audit feedback and consultation form   |
+| ![Report Export](./image%203.png) | Marketing landing section explaining the audit value |
+| ![Share Link](./image%204.png) | Generated report layout|
+| ![Lead Capture](./image%205.png) | Generated report layout |
+| ![Landing](./image%206.png) | PDF report export preview/summary layout |
+| ![Landing](./image%207.png) | PDF report export preview/summary layout|
 
 **30‑second walkthrough**: [Loom video](https://loom.com/share/placeholder)
 
